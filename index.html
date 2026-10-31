@@ -199,7 +199,7 @@ header>div:nth-child(2){min-width:0}
 <!-- STOCKS -->
 <section id="section-stock" class="tab">
   <div class="nb panel" style="--k:#8a6a10"><div class="g4">
-    <div class="stat4" style="--k:#4da3ff"><small>STOCK EN RAYON</small><b id="stRayon"></b><small>btls dispo</small></div>
+    <div class="stat4" style="--k:#4da3ff"><small>STOCK EN RAYON</small><b id="stRayon"></b><small id="stRayonU">btls dispo</small></div>
     <div class="stat4" style="--k:var(--g)"><small>TOTAL ENTRÉES</small><b id="stEnt"></b><small>depuis début</small></div>
     <div class="stat4" style="--k:var(--r)"><small>TOTAL SORTIES</small><b id="stSor"></b><small>ventes cumulées</small></div>
     <div class="stat4" style="--k:var(--a)"><small>VALEUR VENTE</small><b id="stVal"></b><small>potentiel total</small></div>
@@ -230,7 +230,7 @@ header>div:nth-child(2){min-width:0}
 </section>
 <section id="section-admin" class="tab adm">
   <div class="nb panel" style="--k:#7a3ea0"><div class="ph"><i class="fa-solid fa-chart-line"></i><span>Bénéfices</span></div><div id="admSum"></div></div>
-  <div class="nb panel mt" style="--k:#1e7a9a"><div class="ph"><i class="fa-solid fa-tags"></i><span>Prix d’achat et de vente</span></div><div id="admProd"></div></div>
+  <div class="nb panel mt" style="--k:#1e7a9a"><div class="ph"><i class="fa-solid fa-boxes-stacked"></i><span>Valeur du stock disponible</span></div><div id="admProd"></div></div>
   <div class="nb panel mt" style="--k:#1a8f4a"><div class="ph" style="margin:0"><i class="fa-solid fa-lock-open"></i><span style="font-size:13px">Montrer le bénéfice du jour au gérant</span><label class="sw" style="margin:0 0 0 auto"><input type="checkbox" id="swProfit" onchange="cfg.gerantProfit=this.checked;saveCfg()"><i></i></label></div></div>
   <div class="nb panel mt" style="--k:#7a3ea0"><div class="ph"><i class="fa-solid fa-key"></i><span>Mot de passe administrateur</span></div>
     <div class="g2"><button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:13px" onclick="openPwd('change')">Changer</button><button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:13px" onclick="openReset()">Oublié ?</button></div></div>
@@ -297,9 +297,11 @@ header>div:nth-child(2){min-width:0}
 <div id="modalReassort" class="ov"><div class="mdl" style="--g:#4da3ff">
   <div class="mh"><h3>Réassort / Entrée de stock</h3><button onclick="closeModal('modalReassort')"><i class="fa-solid fa-xmark"></i></button></div>
   <form onsubmit="saveReassort(event)">
-    <label>Boisson</label><select class="in" id="reassortProductSelect" required></select>
-    <div id="reassortUnitBox" style="display:none"><label>Unité</label><select class="in" id="reassortUnit"><option value="unit">Bouteilles</option><option value="case">Casiers</option></select></div>
-    <label id="reassortQLbl">Quantité reçue (+ btls)</label><input class="in" type="number" id="reassortQty" required min="1" value="24">
+    <label>Boisson</label><select class="in" id="reassortProductSelect" required onchange="updReassort()"></select>
+    <div id="reassortUnitBox" style="display:none"><label>Unité</label><select class="in" id="reassortUnit" onchange="updReassort()"><option value="unit">Bouteilles</option><option value="case">Casiers</option></select></div>
+    <div id="reassortPcBox" style="display:none"><label>Bouteilles par casier <span style="color:var(--r)">*</span></label><input class="in" type="number" id="reassortPc" min="1" value="12" oninput="updReassort(1)"></div>
+    <label id="reassortQLbl">Quantité reçue (+ btls)</label><input class="in" type="number" id="reassortQty" required min="1" value="24" oninput="updReassort(1)">
+    <small id="reassortHint" style="display:block;margin-top:6px;color:var(--c)"></small>
     <label>Motif ou fournisseur</label><input class="in" id="reassortMotif" value="Livraison fournisseur">
     <label>Qui fait cette opération ? <span style="color:var(--r)">*</span></label><div class="seg whoSeg" id="whoR"><button type="button" data-w="gerant" onclick="pickWho('R','gerant')">Gérant</button><button type="button" data-w="admin" style="--sg:#c084fc" onclick="pickWho('R','admin')">Administrateur</button></div>
     <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalReassort')">Annuler</button><button type="submit" class="btn ok" style="background:#4da3ff;color:#001a3d">Ajouter</button></div>
@@ -314,8 +316,10 @@ header>div:nth-child(2){min-width:0}
     <label>Nom de la boisson</label><input class="in" id="prodName" required placeholder="Ex : Heineken 50cl">
     <label>Catégorie</label><select class="in" id="prodCategory"><option value="Bière">Bière</option><option value="Vin">Vin</option><option value="Liqueur">Liqueur</option><option value="Soda & Jus">Soda & Jus</option><option value="Autre">Autre</option></select>
     <div class="g2"><div><label>Prix d’achat (F)</label><input class="in" type="number" id="prodPrixAchat" required min="0" placeholder="500"></div><div><label>Prix de vente (F)</label><input class="in" type="number" id="prodPrixVente" required min="0" placeholder="800"></div></div>
-    <div id="prodCasierBox" style="display:none"><div class="g2"><div><label>Bouteilles / casier</label><input class="in" type="number" id="prodParCasier" min="1" value="12"></div><div><label>Prix du casier (F)</label><input class="in" type="number" id="prodPrixCasier" min="0" placeholder="Auto"></div></div></div>
-    <label id="prodStockLbl">Stock initial (bouteilles)</label><input class="in" type="number" id="prodStock" required min="0" value="24">
+    <div id="prodCasierBox" style="display:none"><div class="g2"><div><label>Bouteilles / casier</label><input class="in" type="number" id="prodParCasier" min="1" value="12" oninput="updProdHint()"></div><div><label>Prix du casier (F)</label><input class="in" type="number" id="prodPrixCasier" min="0" placeholder="Auto"></div></div></div>
+    <div id="prodStockUnitBox" style="display:none"><label>Stock initial en</label><select class="in" id="prodStockUnit" onchange="updProdHint()"><option value="unit">Bouteilles</option><option value="case">Casiers</option></select></div>
+    <label id="prodStockLbl">Stock initial (bouteilles)</label><input class="in" type="number" id="prodStock" required min="0" step="any" value="24" oninput="updProdHint()">
+    <small id="prodStockHint" style="display:block;margin-top:6px;color:var(--c)"></small>
     <div id="whoPBox"><label>Qui fait cette opération ? <span style="color:var(--r)">*</span></label><div class="seg whoSeg" id="whoP"><button type="button" data-w="gerant" onclick="pickWho('P','gerant')">Gérant</button><button type="button" data-w="admin" style="--sg:#c084fc" onclick="pickWho('P','admin')">Administrateur</button></div></div>
     <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalProduct')">Annuler</button><button type="submit" class="btn a">Enregistrer</button></div>
   </form>
@@ -383,6 +387,13 @@ const payCls=m=>m==='Espèces'?'es':/wave/i.test(m)?'wv':/orange/i.test(m)?'or':
 const payCol={es:'#2ee98a',wv:'#2f8bff',or:'#ff8a1f',mt:'#ffc400',mv:'#4d7dff',cb:'#a855f7','':'#8fa0c8'};
 const emo={'Bière':'🍺','Soda & Jus':'🥤','Vin':'🍷','Liqueur':'🥃'};
 const stTag=n=>n<=0?['out','Rupture']:n<=6?['low','Stock faible']:['ok','En Stock'];
+/* Stock : stocké en bouteilles en interne, affiché en casiers si le mode est « Par casier » */
+const stN=p=>uMode()==='case'?Math.ceil(p.stockActuel/pc(p)):p.stockActuel;
+function stQ(p,q){if(!p||uMode()==='unit')return String(q);const n=pc(p),c=Math.floor(q/n),r=q-c*n,pl=x=>x>1?'s':'';if(uMode()==='both'&&!c)return q+' btl'+pl(q);return c+' casier'+pl(c)+(r?' + '+r+' btl'+pl(r):'')}
+const stU=(p,q)=>uMode()==='unit'||!p?q+' btls':stQ(p,q);
+const cNote=p=>uMode()==='unit'?'':`1 casier = ${pc(p)} btls`;
+const mQ=m=>{const p=products.find(x=>x.id===m.productId);return p&&uMode()==='case'?m.quantite/pc(p):m.quantite};
+const r1=x=>Math.round(x*10)/10;
 const none=t=>`<div class="none">${t}</div>`;
 
 const getLS=k=>{try{return localStorage.getItem(k)}catch(e){return null}},setLS=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
@@ -449,7 +460,7 @@ function setSub(g,n){
 }
 function openModal(id){
   if(id==='modalReassort'||id==='modalProduct'){who={R:null,P:null};document.querySelectorAll('.whoSeg button').forEach(b=>b.classList.remove('on'))}
-  if(id==='modalReassort'){$('reassortUnitBox').style.display=uMode()==='both'?'block':'none';$('reassortQLbl').innerText=uMode()==='case'?'Quantité reçue (+ casiers)':'Quantité reçue (+ btls)'}
+  if(id==='modalReassort')updReassort()
   $(id).classList.add('open');
 }
 function closeModal(id){$(id).classList.remove('open')}
@@ -458,7 +469,7 @@ function closeModal(id){$(id).classList.remove('open')}
 function newSale(id){
   const av=products.filter(p=>p.stockActuel>0);
   if(!av.length){askConfirm("Aucune boisson en stock.",true);return}
-  $('saleProductSelect').innerHTML=av.map(p=>`<option value="${p.id}">${E(p.name)} - ${fm(p.prixVente)} (Stock: ${p.stockActuel})</option>`).join('');
+  $('saleProductSelect').innerHTML=av.map(p=>`<option value="${p.id}">${E(p.name)} - ${fm(p.prixVente)} (Stock: ${stQ(p,p.stockActuel)}${uMode()!=='unit'?' · '+cNote(p):''})</option>`).join('');
   const pick=av.find(p=>p.id===id)||av[0];$('saleProductSelect').value=pick.id;promptSale(pick.id);
 }
 $('saleProductSelect').addEventListener('change',e=>promptSale(parseInt(e.target.value)));
@@ -505,14 +516,26 @@ function openProductModal(id){
   $('prodEditId').value=p?p.id:'';$('prodTitle').innerText=p?'Modifier le produit':'Nouveau produit';
   $('prodName').value=p?p.name:'';$('prodCategory').value=p?p.category:'Bière';
   $('prodPrixAchat').value=p?p.prixAchat:'';$('prodPrixVente').value=p?p.prixVente:'';$('prodStock').value=p?p.stockActuel:24;
-  $('prodStockLbl').innerText=p?'Stock actuel (bouteilles)':'Stock initial (bouteilles)';
-  $('prodCasierBox').style.display=uMode()==='unit'?'none':'block';$('whoPBox').style.display=p?'none':'block';$('prodParCasier').value=p&&p.parCasier||12;$('prodPrixCasier').value=p&&p.prixCasier||'';openModal('modalProduct');
+  
+  $('prodCasierBox').style.display=uMode()==='unit'?'none':'block';$('whoPBox').style.display=p?'none':'block';$('prodParCasier').value=p&&p.parCasier||12;$('prodPrixCasier').value=p&&p.prixCasier||'';
+  const m=uMode(),n=parseInt($('prodParCasier').value)||12;
+  $('prodStockUnitBox').style.display=m==='both'&&!p?'block':'none';$('prodStockUnit').value='unit';
+  $('prodStock').value=m==='case'?(p?Math.round(p.stockActuel/n*100)/100:2):(p?p.stockActuel:24);$('prodStock').dataset.orig=$('prodStock').value;
+  updProdHint();openModal('modalProduct');
+}
+function updProdHint(){
+  const m=uMode(),eid=$('prodEditId').value,ic=m==='case'||(m==='both'&&!eid&&$('prodStockUnit').value==='case');
+  $('prodStockLbl').innerText=(eid?'Stock actuel':'Stock initial')+(ic?' (casiers)':' (bouteilles)');
+  const n=parseInt($('prodParCasier').value)||12,v=parseFloat($('prodStock').value)||0;
+  $('prodStockHint').innerText=ic?`= ${Math.round(v*n)} bouteilles (1 casier = ${n} btls)`:'';
 }
 async function saveProduct(e){
   e.preventDefault();if(!isAdmin())return;if(!$('prodEditId').value&&!await needWho('P'))return;
-  const eid=parseInt($('prodEditId').value),stock=parseInt($('prodStock').value)||0,now=new Date().toISOString();
+  const eid=parseInt($('prodEditId').value),now=new Date().toISOString();let stock=parseFloat($('prodStock').value)||0;
   const f={name:$('prodName').value.trim(),category:$('prodCategory').value,prixAchat:parseInt($('prodPrixAchat').value)||0,prixVente:parseInt($('prodPrixVente').value)||0};
   if(uMode()!=='unit'){f.parCasier=parseInt($('prodParCasier').value)||12;f.prixCasier=parseInt($('prodPrixCasier').value)||f.prixVente*f.parCasier}
+  {const ic=uMode()==='case'||(uMode()==='both'&&!eid&&$('prodStockUnit').value==='case'),n=f.parCasier||12,po=eid&&products.find(x=>x.id===eid);
+   stock=po&&uMode()==='case'&&$('prodStock').value===$('prodStock').dataset.orig?po.stockActuel:Math.round(stock*(ic?n:1))}
   if(eid){
     const p=products.find(x=>x.id===eid);if(!p)return;Object.assign(p,f);
     if(stock!==p.stockActuel){const d=stock-p.stockActuel;stockMovements.unshift({id:Date.now(),productId:p.id,productName:p.name,type:d>0?'ENTREE':'SORTIE',quantite:Math.abs(d),stockAvant:p.stockActuel,stockApres:stock,motif:'Ajustement (administrateur)',date:now});p.stockActuel=stock}
@@ -527,12 +550,23 @@ async function deleteProduct(id){
   if(!await askConfirm(`Supprimer « ${p.name} » ? Son stock et ses mouvements seront supprimés (les ventes passées restent dans l’historique).`))return;
   products=products.filter(x=>x.id!==id);stockMovements=stockMovements.filter(m=>m.productId!==id);saveData();
 }
+function updReassort(keep){
+  const m=uMode(),both=m==='both',cs=m==='case'||(both&&$('reassortUnit').value==='case');
+  $('reassortUnitBox').style.display=both?'block':'none';$('reassortPcBox').style.display=cs?'block':'none';
+  $('reassortQLbl').innerText=cs?'Nombre de casiers reçus (+ casiers)':'Quantité reçue (+ btls)';
+  const p=products.find(x=>x.id===parseInt($('reassortProductSelect').value));
+  if(!keep&&p)$('reassortPc').value=p.parCasier||12;
+  const n=parseInt($('reassortPc').value)||0,q=parseInt($('reassortQty').value)||0;
+  $('reassortHint').innerText=cs&&n&&q?`= ${q*n} bouteilles (${q} casier${q>1?'s':''} × ${n})`:'';
+}
 async function saveReassort(e){
   e.preventDefault();if(!await needWho('R'))return;
-  const p=products.find(x=>x.id===parseInt($('reassortProductSelect').value)),q0=parseInt($('reassortQty').value)||0,cs=uMode()==='case'||(uMode()==='both'&&$('reassortUnit').value==='case'),q=q0*(p&&cs?pc(p):1);
-  if(!p||q<=0)return;const av=p.stockActuel;p.stockActuel+=q;
+  const p=products.find(x=>x.id===parseInt($('reassortProductSelect').value)),q0=parseInt($('reassortQty').value)||0,cs=uMode()==='case'||(uMode()==='both'&&$('reassortUnit').value==='case'),pcv=cs?parseInt($('reassortPc').value)||0:0;
+  if(cs&&pcv<1){askConfirm('Indique le nombre de bouteilles par casier.',true);return}
+  const q=q0*(cs?pcv:1);
+  if(!p||q<=0)return;if(cs)p.parCasier=pcv;const av=p.stockActuel;p.stockActuel+=q;
   stockMovements.unshift({id:Date.now(),productId:p.id,productName:p.name,type:'ENTREE',quantite:q,stockAvant:av,stockApres:p.stockActuel,motif:($('reassortMotif').value.trim()||'Réassort')+(cs?` (${q0} casier${q0>1?'s':''})`:'')+' · par '+WL[who.R],par:who.R,date:new Date().toISOString()});
-  closeModal('modalReassort');saveData();notify(`📦 Réassort : +${q} ${p.name}`,'stock');
+  closeModal('modalReassort');saveData();notify(cs?`📦 Réassort : +${q0} casier${q0>1?'s':''} (${q} btls) ${p.name}`:`📦 Réassort : +${q} ${p.name}`,'stock');
 }
 function saveExpense(e){
   e.preventDefault();
@@ -559,8 +593,8 @@ function renderVentes(S,ca,AL){
   $('vBtls').innerText=sum(S,s=>s.quantite);$('vCA').innerText=fm(ca);$('vTick').innerText=S.length;
   const v=!!validated[todayK()],b=$('btnValidate');b.className='btn mt '+(v?'done':'g');
   b.innerHTML=v?'<i class="fa-solid fa-circle-check"></i> Journée validée':'<i class="fa-solid fa-clipboard-check"></i> Valider les ventes de la journée';
-  $('V-boissons').innerHTML=products.map(p=>{const ps=S.filter(s=>s.productId===p.id),t=stTag(p.stockActuel);
-    return `<div class="nb item"><div class="sp"><div><h4>${E(p.name)}</h4><small>Prix de vente: ${fm(p.prixVente)}</small></div><span class="tag ${t[0]}">Stock: ${p.stockActuel}</span></div><div class="sold"><div><small>Vendus aujourd’hui</small><div><b>${sum(ps,s=>s.quantite)}</b> <small>bouteille(s)</small></div></div><div style="text-align:right"><small>Total Encaissé</small><div><b class="g">${fm(sum(ps,s=>s.total))}</b></div></div></div></div>`}).join('');
+  $('V-boissons').innerHTML=products.map(p=>{const ps=S.filter(s=>s.productId===p.id),t=stTag(stN(p));
+    return `<div class="nb item"><div class="sp"><div><h4>${E(p.name)}</h4><small>Prix de vente: ${fm(p.prixVente)}${uMode()!=='unit'?' · '+cNote(p):''}</small></div><span class="tag ${t[0]}">Stock: ${stQ(p,p.stockActuel)}</span></div><div class="sold"><div><small>Vendus aujourd’hui</small><div><b>${sum(ps,s=>s.quantite)}</b> <small>bouteille(s)</small></div></div><div style="text-align:right"><small>Total Encaissé</small><div><b class="g">${fm(sum(ps,s=>s.total))}</b></div></div></div></div>`}).join('');
   $('vTabT').innerText=`Tickets (${AL.length})`;$('vTickCount').innerText=`${AL.length} ticket(s)`;
   const ms=[...new Set(AL.map(s=>s.paymentMethod))];if(payFilter!=='TOUS'&&!ms.includes(payFilter))payFilter='TOUS';
   $('payChips').innerHTML=`<button class="chip ${payFilter==='TOUS'?'on':''}" data-m="TOUS" onclick="payFilter=this.dataset.m;refreshUI()">Tous (${AL.length})</button>`+ms.map(m=>`<button class="chip ${payFilter===m?'on':''}" data-m="${E(m)}" onclick="payFilter=this.dataset.m;refreshUI()">${E(m)} (${fm(sum(S.filter(s=>s.paymentMethod===m),s=>s.total))})</button>`).join('');
@@ -571,14 +605,14 @@ function renderVentes(S,ca,AL){
   $('V-paiements').innerHTML=`<div class="nb panel" style="--k:#1e7a9a"><div class="ph" style="font-size:14px;text-transform:uppercase"><span>Répartition et sommes des encaissements</span></div><div class="g2"><div class="mini" style="--k:#1b7a5a;flex-direction:column;align-items:flex-start;border-color:#1b7a5a;background:var(--s7)"><small style="color:var(--g)"><i class="fa-solid fa-money-bill"></i> Caisse (Espèces)</small><b>${fm(esp)}</b><small>${pct(esp)}% du total</small></div><div class="mini" style="flex-direction:column;align-items:flex-start;border-color:#2f8bff;background:var(--s4)"><small style="color:var(--b)"><i class="fa-solid fa-mobile-screen"></i> Mobile & Banque</small><b>${fm(mob)}</b><small>${pct(mob)}% du total</small></div></div></div><div class="mt">`+(grp.length?grp.map(g=>{const c=payCol[payCls(g.m)];return `<div class="nb pr" style="--k:${c}"><div class="sp"><div><b style="color:var(--tx);font-size:16px">${E(g.m)}</b><br><small>${g.n} transaction(s)</small></div><div style="text-align:right"><b>${fm(g.t)} CFA</b><br><small>${pct(g.t)}% du CA</small></div></div><div class="bar"><i style="width:${pct(g.t)}%"></i></div></div>`}).join(''):none("Aucun paiement."))+`</div>`;
 }
 function renderStock(){
-  const ent=sum(stockMovements.filter(m=>m.type==='ENTREE'),m=>m.quantite),sor=sum(stockMovements.filter(m=>m.type==='SORTIE'),m=>m.quantite);
-  $('stRayon').innerText=sum(products,p=>p.stockActuel);$('stEnt').innerText='+'+ent;$('stSor').innerText='−'+sor;$('stVal').innerText=fm(sum(products,p=>p.prixVente*p.stockActuel));
-  $('S-boisson').innerHTML=products.map(p=>{const mv=stockMovements.filter(m=>m.productId===p.id),e=sum(mv.filter(m=>m.type==='ENTREE'),m=>m.quantite),s=sum(mv.filter(m=>m.type==='SORTIE'),m=>m.quantite),t=stTag(p.stockActuel);
-    return `<div class="nb item" style="--k:var(--ln2)"><div class="sp"><div><h4>${E(p.name)}</h4><small>Catégorie : ${E(p.category)}</small></div><span class="tag ${t[0]}">${t[1]}</span></div><div class="g3 mt"><div class="box"><small>Prix vente</small><b style="color:var(--b)">${fm(p.prixVente)}</b></div><div class="box"><small>Stock dispo</small><b>${p.stockActuel}</b></div><div class="box"><small>Valeur stock</small><b style="color:var(--g)">${fm(p.prixVente*p.stockActuel)}</b></div></div><div class="flux"><span>Entrées : <span class="fe">+${e} btls</span></span><span>Sorties : <span class="fs">−${s} btls</span></span></div>${isAdmin()?`<div class="flux"><span>Achat : ${fm(p.prixAchat)}</span><span style="color:var(--g)">Marge : +${fm(p.prixVente-p.prixAchat)} / btl</span></div><div class="acts" style="margin-top:10px"><button class="btn a" style="font-size:13px;padding:10px" onclick="openProductModal(${p.id})"><i class="fa-solid fa-pen"></i> Modifier</button><button class="btn cancel" style="font-size:13px;padding:10px" onclick="deleteProduct(${p.id})"><i class="fa-solid fa-trash-can"></i> Supprimer</button></div>`:''}</div>`}).join('');
+  const ent=r1(sum(stockMovements.filter(m=>m.type==='ENTREE'),mQ)),sor=r1(sum(stockMovements.filter(m=>m.type==='SORTIE'),mQ));
+  $('stRayon').innerText=uMode()==='case'?r1(sum(products,p=>p.stockActuel/pc(p))):sum(products,p=>p.stockActuel);$('stRayonU').innerText=uMode()==='case'?'casiers dispo':'btls dispo';$('stEnt').innerText='+'+ent;$('stSor').innerText='−'+sor;$('stVal').innerText=fm(sum(products,p=>p.prixVente*p.stockActuel));
+  $('S-boisson').innerHTML=products.map(p=>{const mv=stockMovements.filter(m=>m.productId===p.id),e=sum(mv.filter(m=>m.type==='ENTREE'),m=>m.quantite),s=sum(mv.filter(m=>m.type==='SORTIE'),m=>m.quantite),t=stTag(stN(p));
+    return `<div class="nb item" style="--k:var(--ln2)"><div class="sp"><div><h4>${E(p.name)}</h4><small>Catégorie : ${E(p.category)}${uMode()!=='unit'?' · '+cNote(p):''}</small></div><span class="tag ${t[0]}">${t[1]}</span></div><div class="g3 mt"><div class="box"><small>Prix vente</small><b style="color:var(--b)">${fm(p.prixVente)}</b></div><div class="box"><small>Stock dispo</small><b${uMode()==='unit'?'':' style="font-size:14px"'}>${stQ(p,p.stockActuel)}</b></div><div class="box"><small>Valeur stock</small><b style="color:var(--g)">${fm(p.prixVente*p.stockActuel)}</b></div></div><div class="flux"><span>Entrées : <span class="fe">+${stU(p,e)}</span></span><span>Sorties : <span class="fs">−${stU(p,s)}</span></span></div>${isAdmin()?`<div class="flux"><span>Achat : ${fm(p.prixAchat)}</span><span style="color:var(--g)">Marge : +${fm(p.prixVente-p.prixAchat)} / btl</span></div><div class="acts" style="margin-top:10px"><button class="btn a" style="font-size:13px;padding:10px" onclick="openProductModal(${p.id})"><i class="fa-solid fa-pen"></i> Modifier</button><button class="btn cancel" style="font-size:13px;padding:10px" onclick="deleteProduct(${p.id})"><i class="fa-solid fa-trash-can"></i> Supprimer</button></div>`:''}</div>`}).join('');
   $('sTabJ').innerText=`Journal des Flux (${stockMovements.length})`;
   const L=movAll?stockMovements:stockMovements.slice(0,5);
-  $('movList').innerHTML=(stockMovements.length?L.map(m=>{const e=m.type==='ENTREE';return `<div class="tr"><div class="tm"><b>${E(m.productName)}</b><small>${E(m.motif)} · ${dtm(m.date)}</small></div><div><b style="color:var(--${e?'g':'r'})">${e?'+':'−'}${m.quantite}</b><br><small>${m.stockAvant} → ${m.stockApres}</small></div></div>`}).join(''):none("Aucun mouvement enregistré."))+(stockMovements.length>5?`<button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:14px;padding:12px;margin-top:4px" onclick="movAll=!movAll;renderStock()">${movAll?'Réduire':`Voir tout (${stockMovements.length})`}</button>`:'');
-  $('reassortProductSelect').innerHTML=products.map(p=>`<option value="${p.id}">${E(p.name)} (stock : ${p.stockActuel})</option>`).join('');
+  $('movList').innerHTML=(stockMovements.length?L.map(m=>{const e=m.type==='ENTREE';const mp=products.find(x=>x.id===m.productId);return `<div class="tr"><div class="tm"><b>${E(m.productName)}</b><small>${E(m.motif)} · ${dtm(m.date)}</small></div><div><b style="color:var(--${e?'g':'r'})">${e?'+':'−'}${stQ(mp,m.quantite)}</b><br><small>${stQ(mp,m.stockAvant)} → ${stQ(mp,m.stockApres)}</small></div></div>`}).join(''):none("Aucun mouvement enregistré."))+(stockMovements.length>5?`<button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:14px;padding:12px;margin-top:4px" onclick="movAll=!movAll;renderStock()">${movAll?'Réduire':`Voir tout (${stockMovements.length})`}</button>`:'');
+  $('reassortProductSelect').innerHTML=products.map(p=>`<option value="${p.id}">${E(p.name)} (stock : ${stQ(p,p.stockActuel)})</option>`).join('');
 }
 function renderHist(){
   const T=todayK(),y=dk(Date.now()-864e5),w=dk(Date.now()-6*864e5);
@@ -630,7 +664,8 @@ function renderAdmin(){
   const T=todayK(),W=dk(Date.now()-6*864e5);
   const per=f=>{const S=sales.filter(x=>!x.annule&&dk(x.date)>=f),dep=sum(expenses.filter(e=>dk(e.date)>=f),e=>e.montant),ca=sum(S,x=>x.total),pa=sum(S,x=>x.coutAchatTotal);return{ca,pa,dep,b:ca-pa-dep}};
   $('admSum').innerHTML=[['Aujourd’hui',T],['7 derniers jours',W],['Depuis le début','0000']].map(([l,f])=>{const r=per(f);return `<div class="ar"><b>${l}</b><span>Ventes ${fm(r.ca)}</span><span>Achats ${fm(r.pa)}</span><span>Dépenses ${fm(r.dep)}</span><b style="color:${r.b>=0?'var(--g)':'var(--r)'}">Bénéfice ${fm(r.b)}</b></div>`}).join('');
-  $('admProd').innerHTML=products.length?products.map(p=>`<div class="ar"><b>${E(p.name)}</b><span>Achat ${fm(p.prixAchat)} · Vente ${fm(p.prixVente)}</span><span>Marge ${fm(p.prixVente-p.prixAchat)} / btl · Stock ${p.stockActuel}</span>${uMode()!=='unit'?`<span>Casier (${pc(p)} btls) : ${fm(prixC(p))}</span>`:''}</div>`).join(''):none('Aucun produit.');
+  {const av=products.filter(p=>p.stockActuel>0),ta=sum(av,p=>p.prixAchat*p.stockActuel),tv=sum(av,p=>p.prixVente*p.stockActuel),nb=sum(av,p=>p.stockActuel);
+  $('admProd').innerHTML=av.length?`<div class="g2"><div class="mini"><div class="ic"><i class="fa-solid fa-cart-shopping"></i></div><div><small>Prix d’achat total</small><b>${fm(ta)}</b></div></div><div class="mini g"><div class="ic"><i class="fa-solid fa-tag"></i></div><div><small>Prix de vente total</small><b>${fm(tv)}</b></div></div></div><div class="ar" style="margin-top:12px"><span>${av.length} produit${av.length>1?'s':''} · ${nb} bouteille${nb>1?'s':''} en stock</span><b style="color:${tv-ta>=0?'var(--g)':'var(--r)'}">Marge potentielle ${fm(tv-ta)}</b></div>`:none('Aucun produit en stock.')}
 }
 function openReset(){closeModal('modalPwd');$('rsPass').value='';$('rsErr').innerText='';openModal('modalReset')}
 async function submitReset(e){
