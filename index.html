@@ -32,6 +32,11 @@
 #pwBtn{background:linear-gradient(90deg,#d97706,#ffb020);color:#2b1700}#pwBtn:disabled{opacity:.6}
 #pwMsg{min-height:20px;margin:12px 0;color:#ff5a7e;font-size:14px;font-weight:700}
 #subBar{display:none;text-align:center;padding:9px 12px;font-size:13px;font-weight:800;background:linear-gradient(90deg,#d97706,#ffb020);color:#2b1700;cursor:pointer}
+details.row{margin:0;border:0;border-radius:0;border-top:1px solid var(--ln);background:transparent}details.row:first-child{border-top:0}details.row>summary{display:flex;align-items:center;gap:10px;padding:13px 14px;font-size:14px}details.row>summary::after{content:'›';margin-left:auto;font-size:19px;color:var(--sub);transition:.2s}details.row[open]>summary::after{transform:rotate(90deg)}details.row>summary em{font-style:normal;color:var(--sub);font-size:12px;font-weight:600}details.row>.hl{padding:0 14px 14px;font-size:13px;line-height:1.55}details.row details{margin:8px 0 0}
+.ar{display:flex;flex-wrap:wrap;gap:3px 12px;padding:9px 0;border-top:1px solid var(--ln3);font-size:12px}.ar b:first-child{flex:1 0 100%;font-size:13px}
+#synth{padding:10px!important}#synth .ph{margin-bottom:6px}#synth .tr{padding:6px 8px;margin-top:5px}#synth .th{display:none}#synth .tm b{font-size:13px}#synth .mini{padding:7px 9px}#synth .hint{margin:6px 0 2px;font-size:11px}#synth .more{padding:7px 0;font-size:12px}
+#dbStock .tr{justify-content:flex-start}#dbStock .tm{text-align:left}
+#histList .day{padding:8px 12px!important;margin-top:6px}#histList .day:not(.open)>*:not(:first-child){display:none}#histList .day>.sp{cursor:pointer;gap:6px;align-items:center}#histList .day h4{font-size:13px;margin:0}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 body{margin:0;min-height:100vh;background:radial-gradient(70% 35% at 50% 0%,#0f2a6b55,transparent 70%),radial-gradient(60% 30% at 100% 100%,#1a8f6a33,transparent 70%),var(--bg);background-attachment:fixed;color:var(--tx);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
@@ -164,7 +169,7 @@ header>div:nth-child(2){min-width:0}
     <button class="btn g" onclick="newSale()"><i class="fa-solid fa-cart-plus"></i> + Nouvelle Vente</button>
     <button class="btn r" onclick="openModal('modalExpense')"><i class="fa-solid fa-dollar-sign"></i> + Dépense</button>
   </div>
-  <div class="nb panel mt">
+  <div class="nb panel mt" id="synth">
     <div class="ph"><i class="fa-solid fa-chart-column"></i><span>Synthèse des Ventes du Jour</span><em id="dbCount"></em></div>
     <div class="g2">
       <div class="mini"><div class="ic"><i class="fa-solid fa-boxes-stacked"></i></div><div><small>Articles Vendus</small><b id="dbItems"></b></div></div>
@@ -172,6 +177,7 @@ header>div:nth-child(2){min-width:0}
     </div>
     <div class="hint"><span>Dernières transactions (3 dernières ventes) :</span><span>Plus récente en haut</span></div>
     <div id="dbRecent"></div>
+    <div class="hint" style="margin-top:8px"><span>Dernier ajout au stock :</span></div><div id="dbStock"></div>
     <div class="more" onclick="switchTab('ventes');setSub('V','tickets')">Accéder au tableau complet des ventes <i class="fa-solid fa-arrow-right"></i></div>
   </div>
 </section>
@@ -222,6 +228,13 @@ header>div:nth-child(2){min-width:0}
   <button class="btn r" onclick="openModal('modalExpense')"><i class="fa-solid fa-plus"></i> Ajouter une dépense</button>
   <div class="nb panel mt" style="--k:#7a1e3e"><div class="ph"><span>Dépenses</span><em id="expTotal" style="color:var(--r)"></em></div><div id="expList"></div></div>
 </section>
+<section id="section-admin" class="tab adm">
+  <div class="nb panel" style="--k:#7a3ea0"><div class="ph"><i class="fa-solid fa-chart-line"></i><span>Bénéfices</span></div><div id="admSum"></div></div>
+  <div class="nb panel mt" style="--k:#1e7a9a"><div class="ph"><i class="fa-solid fa-tags"></i><span>Prix d’achat et de vente</span></div><div id="admProd"></div></div>
+  <div class="nb panel mt" style="--k:#1a8f4a"><div class="ph" style="margin:0"><i class="fa-solid fa-lock-open"></i><span style="font-size:13px">Montrer le bénéfice du jour au gérant</span><label class="sw" style="margin:0 0 0 auto"><input type="checkbox" id="swProfit" onchange="cfg.gerantProfit=this.checked;saveCfg()"><i></i></label></div></div>
+  <div class="nb panel mt" style="--k:#7a3ea0"><div class="ph"><i class="fa-solid fa-key"></i><span>Mot de passe administrateur</span></div>
+    <div class="g2"><button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:13px" onclick="openPwd('change')">Changer</button><button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:13px" onclick="openReset()">Oublié ?</button></div></div>
+</section>
 <!-- PARAMÈTRES -->
 <section id="section-settings" class="tab">
   <div class="nb panel" style="--k:#1e7a9a"><div class="ph" style="margin:0"><i class="fa-solid fa-moon"></i><span>Mode sombre</span><label class="sw" style="margin:0 0 0 auto"><input type="checkbox" id="swDark" onchange="toggleTheme()"><i></i></label></div></div>
@@ -234,13 +247,27 @@ header>div:nth-child(2){min-width:0}
     <div id="accEmail" style="color:var(--sub);font-size:14px;margin-bottom:10px;word-break:break-all"></div>
     <button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:14px" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Se déconnecter</button>
   </div>
-  <div class="nb panel mt" style="--k:#1e7a9a"><div class="ph"><i class="fa-solid fa-circle-question"></i><span>Comment ça marche</span></div>
-    <details><summary>Faire une vente</summary><div class="hl">Tableau ou Ventes → « + Nouvelle Vente » → boisson, paiement, quantité → Valider. Le stock baisse automatiquement.</div></details>
-    <details><summary>Stocks</summary><div class="hl">Le stock de chaque boisson et tous les mouvements. Le bouton orange sert au réassort ; seul l’administrateur ajoute ou modifie un produit.</div></details>
-    <details><summary>Dépenses</summary><div class="hl">« + Dépense » depuis le Tableau ou l’onglet Dépenses. Elles comptent dans le bilan du jour.</div></details>
-    <details><summary>Historique</summary><div class="hl">Les ventes jour par jour. Recherche par date ou par produit. La journée se valide depuis Ventes.</div></details>
-    <details><summary>Gérant et Administrateur</summary><div class="hl"><b>Gérant</b> : enregistre ventes et dépenses, annule un ticket ou une dépense, fait un réassort, valide la journée et sauvegarde. Il ne voit pas les bénéfices et ne modifie pas les produits.<br><b>Administrateur</b> (mot de passe) : voit les bénéfices en temps réel, modifie et supprime tout.</div></details>
-  </div>
+  <div class="nb panel mt" style="--k:#1e7a9a;padding:0;overflow:hidden">
+  <details class="row"><summary><i class="fa-solid fa-crown"></i> Abonnement <em id="stSub"></em></summary><div class="hl"><span id="stSubTxt"></span><button class="btn mt" style="font-size:14px" onclick="openPaywall()">S’abonner / Renouveler</button></div></details>
+  <details class="row"><summary><i class="fa-solid fa-boxes-stacked"></i> Type de vente <em id="stMode"></em></summary><div class="hl"><div class="seg" id="segMode" style="margin:0"><button data-m="unit" onclick="setMode('unit')">Unité</button><button data-m="case" onclick="setMode('case')">Casier</button><button data-m="both" onclick="setMode('both')">Les deux</button></div></div></details>
+  <details class="row"><summary><i class="fa-solid fa-circle-question"></i> Comment ça marche</summary><div class="hl">
+    <details><summary>Démarrer</summary><div class="hl">Crée ton compte, choisis ton type de vente (unité, casier ou les deux), puis passe en mode Administrateur (Réglages) pour ajouter tes boissons : Stocks → Nouveau produit.</div></details>
+    <details><summary>Vendre</summary><div class="hl">« + Nouvelle Vente » → boisson, moyen de paiement, quantité → Valider. Le stock baisse tout seul. Pour annuler une vente, touche la corbeille du ticket.</div></details>
+    <details><summary>Réassort et nouveau produit</summary><div class="hl">Le bouton orange de Stocks ajoute du stock. À chaque réassort ou nouveau produit, tu choisis ton statut (Gérant ou Administrateur) : ainsi on sait qui l’a fait. Les 3 derniers ajouts s’affichent sur le Tableau.</div></details>
+    <details><summary>Dépenses et historique</summary><div class="hl">« + Dépense » pour noter une sortie d’argent. L’Historique montre chaque journée en une ligne : touche-la pour voir tous les détails. La journée se valide depuis Ventes.</div></details>
+    <details><summary>Gérant et Administrateur</summary><div class="hl"><b>Gérant</b> : ventes, dépenses, réassort, annulations. <b>Administrateur</b> (mot de passe) : en plus, l’onglet Admin avec prix d’achat, prix de vente et bénéfices, la modification des produits, et le choix de montrer ou non le bénéfice du jour au gérant.</div></details>
+    <details><summary>Abonnement</summary><div class="hl">Essai gratuit de 14 jours, puis 8 500 F par mois. Touche « S’abonner » (bande orange ou Réglages), choisis ton pays et paie par Mobile Money ou carte. Chaque paiement ajoute 30 jours. Si l’abonnement se termine, tes données sont conservées : tu retrouves tout en renouvelant.</div></details>
+    <details><summary>Sauvegarde et réseau</summary><div class="hl">Tes données sont synchronisées automatiquement (point vert en haut). Sans internet, l’application continue et envoie tout au retour du réseau. Le même compte marche sur plusieurs téléphones.</div></details>
+  </div></details>
+  <details class="row"><summary><i class="fa-solid fa-circle-info"></i> FAQ</summary><div class="hl">
+    <details><summary>J’ai oublié mon mot de passe de connexion</summary><div class="hl">Sur l’écran de connexion, touche « Mot de passe oublié ? » et suis le lien reçu par email.</div></details>
+    <details><summary>J’ai oublié le mot de passe administrateur</summary><div class="hl">Onglet Admin (ou fenêtre du mot de passe) → « Oublié ? », puis entre le mot de passe de ton compte et crée-en un nouveau.</div></details>
+    <details><summary>Mes données sont-elles perdues si je ne paie pas ?</summary><div class="hl">Non. Elles restent enregistrées. Seule l’ajout de nouvelles ventes est bloqué jusqu’au renouvellement.</div></details>
+    <details><summary>Puis-je l’utiliser sur plusieurs téléphones ?</summary><div class="hl">Oui, avec le même compte. Les données se synchronisent.</div></details>
+    <details><summary>Comment vendre par casier ?</summary><div class="hl">Réglages → Type de vente. Pour chaque produit, indique le nombre de bouteilles par casier et le prix du casier.</div></details>
+  </div></details>
+  <details class="row"><summary><i class="fa-solid fa-scale-balanced"></i> Légal et confidentialité</summary><div class="hl">Tes données (produits, ventes, dépenses, email) sont stockées de façon sécurisée sur nos serveurs, visibles uniquement par ton compte. Elles ne sont ni vendues ni partagées. Tu peux demander leur suppression par email. <a href="legal.html" target="_blank" style="color:var(--c);font-weight:700">Lire les conditions d’utilisation et la politique de confidentialité</a>.</div></details>
+</div>
 </section>
 </main>
 
@@ -249,6 +276,7 @@ header>div:nth-child(2){min-width:0}
   <button id="tabBtn-ventes" style="--t:#2ee98a" onclick="switchTab('ventes')"><i class="fa-solid fa-cart-shopping"></i>Ventes</button>
   <button id="tabBtn-stock" style="--t:#ffb020" onclick="switchTab('stock')"><i class="fa-solid fa-box-archive"></i>Stocks</button>
   <button id="tabBtn-historique" style="--t:#c084fc" onclick="switchTab('historique')"><i class="fa-solid fa-clock-rotate-left"></i>Historique</button>
+  <button id="tabBtn-admin" class="adm" style="--t:#a855f7" onclick="switchTab('admin')"><i class="fa-solid fa-user-shield"></i>Admin</button>
   <button id="tabBtn-depenses" style="--t:#ff3b6b" onclick="switchTab('depenses')"><i class="fa-solid fa-money-bill-wave"></i>Dépenses</button>
 </nav>
 
@@ -256,6 +284,7 @@ header>div:nth-child(2){min-width:0}
 <div id="modalSale" class="ov"><div class="mdl">
   <div class="mh"><h3><i class="fa-solid fa-cart-plus" style="color:var(--g)"></i> Enregistrer une vente</h3><button onclick="closeModal('modalSale')"><i class="fa-solid fa-xmark"></i></button></div>
   <label>Boisson :</label><select class="in" id="saleProductSelect"></select>
+    <div id="saleUnitBox" style="display:none"><label>Vendre par</label><select class="in" id="saleUnit" onchange="onSaleUnit()"><option value="unit">Bouteille (unité)</option><option value="case">Casier</option></select></div>
   <label>Moyen de paiement :</label>
   <select class="in" id="salePaymentMethod"><option>Espèces</option><option>Wave</option><option>Orange Money</option><option>MTN Money</option><option>Moov Money</option><option>Carte Bancaire</option><option>Offert / Perte</option></select>
   <label style="text-align:center">Quantité (saisie manuelle ou +/−) :</label>
@@ -269,8 +298,10 @@ header>div:nth-child(2){min-width:0}
   <div class="mh"><h3>Réassort / Entrée de stock</h3><button onclick="closeModal('modalReassort')"><i class="fa-solid fa-xmark"></i></button></div>
   <form onsubmit="saveReassort(event)">
     <label>Boisson</label><select class="in" id="reassortProductSelect" required></select>
-    <label>Quantité reçue (+ btls)</label><input class="in" type="number" id="reassortQty" required min="1" value="24">
+    <div id="reassortUnitBox" style="display:none"><label>Unité</label><select class="in" id="reassortUnit"><option value="unit">Bouteilles</option><option value="case">Casiers</option></select></div>
+    <label id="reassortQLbl">Quantité reçue (+ btls)</label><input class="in" type="number" id="reassortQty" required min="1" value="24">
     <label>Motif ou fournisseur</label><input class="in" id="reassortMotif" value="Livraison fournisseur">
+    <label>Qui fait cette opération ? <span style="color:var(--r)">*</span></label><div class="seg whoSeg" id="whoR"><button type="button" data-w="gerant" onclick="pickWho('R','gerant')">Gérant</button><button type="button" data-w="admin" style="--sg:#c084fc" onclick="pickWho('R','admin')">Administrateur</button></div>
     <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalReassort')">Annuler</button><button type="submit" class="btn ok" style="background:#4da3ff;color:#001a3d">Ajouter</button></div>
   </form>
   <button class="btn a mt adm" style="font-size:14px;padding:12px" onclick="closeModal('modalReassort');openProductModal()"><i class="fa-solid fa-plus"></i> Nouveau produit</button>
@@ -283,11 +314,18 @@ header>div:nth-child(2){min-width:0}
     <label>Nom de la boisson</label><input class="in" id="prodName" required placeholder="Ex : Heineken 50cl">
     <label>Catégorie</label><select class="in" id="prodCategory"><option value="Bière">Bière</option><option value="Vin">Vin</option><option value="Liqueur">Liqueur</option><option value="Soda & Jus">Soda & Jus</option><option value="Autre">Autre</option></select>
     <div class="g2"><div><label>Prix d’achat (F)</label><input class="in" type="number" id="prodPrixAchat" required min="0" placeholder="500"></div><div><label>Prix de vente (F)</label><input class="in" type="number" id="prodPrixVente" required min="0" placeholder="800"></div></div>
+    <div id="prodCasierBox" style="display:none"><div class="g2"><div><label>Bouteilles / casier</label><input class="in" type="number" id="prodParCasier" min="1" value="12"></div><div><label>Prix du casier (F)</label><input class="in" type="number" id="prodPrixCasier" min="0" placeholder="Auto"></div></div></div>
     <label id="prodStockLbl">Stock initial (bouteilles)</label><input class="in" type="number" id="prodStock" required min="0" value="24">
+    <div id="whoPBox"><label>Qui fait cette opération ? <span style="color:var(--r)">*</span></label><div class="seg whoSeg" id="whoP"><button type="button" data-w="gerant" onclick="pickWho('P','gerant')">Gérant</button><button type="button" data-w="admin" style="--sg:#c084fc" onclick="pickWho('P','admin')">Administrateur</button></div></div>
     <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalProduct')">Annuler</button><button type="submit" class="btn a">Enregistrer</button></div>
   </form>
 </div></div>
 
+<div id="modalMode" class="ov" style="z-index:80"><div class="mdl" style="--g:#2ee98a;text-align:center"><div class="mh"><h3>Comment vends-tu ?</h3></div><p style="color:var(--sub);font-size:13px;margin:0 0 6px">Bar ou dépôt de boissons : choisis ton type de vente. Tu pourras le changer dans les Réglages.</p>
+  <button class="btn g mt" onclick="setMode('unit')">🍺 À l’unité (bouteille)</button><button class="btn a mt" onclick="setMode('case')">📦 Par casier</button><button class="btn mt" style="background:var(--s4);border:1.5px solid var(--ln2)" onclick="setMode('both')">🍺📦 Les deux</button></div></div>
+<div id="modalReset" class="ov" style="z-index:75"><div class="mdl" style="--g:#a855f7"><div class="mh"><h3>Mot de passe administrateur oublié</h3><button onclick="closeModal('modalReset')"><i class="fa-solid fa-xmark"></i></button></div>
+  <form onsubmit="submitReset(event)"><label>Pour prouver que c’est toi, entre le mot de passe de ton compte (celui de connexion)</label><input class="in" type="password" id="rsPass" required autocomplete="current-password"><div id="rsErr" style="color:var(--r);font-size:13px;min-height:18px"></div>
+  <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalReset')">Annuler</button><button type="submit" class="btn ok" style="background:#a855f7">Continuer</button></div></form></div></div>
 <!-- Confirmation -->
 <div id="modalConfirm" class="ov" style="z-index:70"><div class="mdl" style="--g:#ff3b6b;text-align:center"><div id="cfMsg" style="font-size:16px;font-weight:600;line-height:1.4;margin:8px 0 2px"></div><div class="acts"><button id="cfNo" class="btn cancel" onclick="cfDone(false)">Annuler</button><button id="cfYes" class="btn ok" onclick="cfDone(true)">Confirmer</button></div></div></div>
 
@@ -352,7 +390,7 @@ let role='gerant';try{if(sessionStorage.getItem('bar_role')==='admin'&&getLS('ba
 let theme=getLS('bar_theme')==='light'?'light':'dark',pwdMode='login';
 const isAdmin=()=>role==='admin';
 function applyRole(){document.documentElement.dataset.role=role;const b=$('roleBadge');b.innerText=isAdmin()?'ADMIN':'GÉRANT';b.style.setProperty('--k',isAdmin()?'var(--p)':'var(--a)')}
-function setRole(r){role=r;try{sessionStorage.setItem('bar_role',r)}catch(e){}refreshUI()}
+function setRole(r){role=r;try{sessionStorage.setItem('bar_role',r)}catch(e){}if(r!=='admin'&&$('section-admin').classList.contains('on'))switchTab('dashboard');refreshUI()}
 function applyTheme(){document.documentElement.dataset.theme=theme}
 function toggleTheme(){theme=theme==='dark'?'light':'dark';setLS('bar_theme',theme);applyTheme();renderSettings()}
 function renderSettings(){
@@ -370,7 +408,7 @@ function openPwd(m){
   pwdMode=m;$('pwdOldBox').style.display=m==='change'?'block':'none';$('pwd2Box').style.display=m==='login'?'none':'block';
   $('pwdTitle').innerText=m==='create'?'Créer le mot de passe administrateur':m==='login'?'Mot de passe administrateur':'Changer le mot de passe';
   $('pwd1Lbl').innerText=m==='login'?'Mot de passe':'Nouveau mot de passe';
-  ['pwdOld','pwd1','pwd2'].forEach(i=>$(i).value='');$('pwdErr').innerText='';openModal('modalPwd');
+  ['pwdOld','pwd1','pwd2'].forEach(i=>$(i).value='');$('pwdErr').innerText='';$('pwdForgot').style.display=m==='login'?'block':'none';openModal('modalPwd');
 }
 async function submitPwd(e){
   e.preventDefault();const err=t=>{$('pwdErr').innerText=t},a=$('pwd1').value,salt=getLS('bar_admin_salt')||'',stored=getLS('bar_admin_hash');
@@ -399,7 +437,7 @@ function notify(msg,kind){
 }
 function saveData(){try{localStorage.setItem('bar_products',JSON.stringify(products));localStorage.setItem('bar_sales',JSON.stringify(sales));localStorage.setItem('bar_expenses',JSON.stringify(expenses));localStorage.setItem('bar_movements',JSON.stringify(stockMovements));localStorage.setItem('bar_validated',JSON.stringify(validated))}catch(e){}refreshUI();if(typeof scheduleSync==='function')scheduleSync()}
 
-const TITLES={dashboard:'TABLEAU DE BORD',ventes:'VENTES',stock:'STOCKS',historique:'HISTORIQUE',depenses:'DÉPENSES',settings:'PARAMÈTRES'};
+const TITLES={admin:'ADMINISTRATEUR',dashboard:'TABLEAU DE BORD',ventes:'VENTES',stock:'STOCKS',historique:'HISTORIQUE',depenses:'DÉPENSES',settings:'PARAMÈTRES'};
 function switchTab(id){
   document.querySelectorAll('.tab').forEach(e=>e.classList.remove('on'));$('section-'+id).classList.add('on');
   document.querySelectorAll('.tb button').forEach(b=>b.classList.remove('on'));const tb=$('tabBtn-'+id);if(tb)tb.classList.add('on');
@@ -409,7 +447,11 @@ function setSub(g,n){
   document.querySelectorAll(`#seg${g} button`).forEach(b=>b.classList.toggle('on',b.dataset.s===n));
   document.querySelectorAll(`[id^="${g}-"]`).forEach(p=>p.classList.toggle('on',p.id===`${g}-${n}`));
 }
-function openModal(id){$(id).classList.add('open')}
+function openModal(id){
+  if(id==='modalReassort'||id==='modalProduct'){who={R:null,P:null};document.querySelectorAll('.whoSeg button').forEach(b=>b.classList.remove('on'))}
+  if(id==='modalReassort'){$('reassortUnitBox').style.display=uMode()==='both'?'block':'none';$('reassortQLbl').innerText=uMode()==='case'?'Quantité reçue (+ casiers)':'Quantité reçue (+ btls)'}
+  $(id).classList.add('open');
+}
 function closeModal(id){$(id).classList.remove('open')}
 
 // ---- Vente ----
@@ -420,27 +462,31 @@ function newSale(id){
   const pick=av.find(p=>p.id===id)||av[0];$('saleProductSelect').value=pick.id;promptSale(pick.id);
 }
 $('saleProductSelect').addEventListener('change',e=>promptSale(parseInt(e.target.value)));
+function saleU(){return uMode()==='case'?'case':uMode()==='both'?$('saleUnit').value:'unit'}
+function saleInfo(){const p=activeProductForSale,c=saleU()==='case';return{c,mult:c?pc(p):1,price:c?prixC(p):p.prixVente}}
+const maxQ=()=>Math.floor(activeProductForSale.stockActuel/saleInfo().mult);
 function promptSale(id){
-  activeProductForSale=products.find(p=>p.id===id);
-  if(!activeProductForSale||activeProductForSale.stockActuel<=0)return;
-  $('saleQuantity').value=1;$('saleQuantity').max=activeProductForSale.stockActuel;
-  updateSaleModalTotal();openModal('modalSale');
+  activeProductForSale=products.find(p=>p.id===id);const p=activeProductForSale;
+  if(!p||p.stockActuel<=0)return;
+  $('saleUnitBox').style.display=uMode()==='both'?'block':'none';
+  if(uMode()==='both'&&p.stockActuel<pc(p))$('saleUnit').value='unit';
+  if(maxQ()<1){askConfirm('Stock insuffisant pour un casier complet.',true);return}
+  $('saleQuantity').value=1;$('saleQuantity').max=maxQ();updateSaleModalTotal();openModal('modalSale');
 }
-function adjustSaleQty(d){
-  const i=$('saleQuantity');let v=(parseInt(i.value)||1)+d;if(v<1)v=1;
-  if(activeProductForSale&&v>activeProductForSale.stockActuel)v=activeProductForSale.stockActuel;
-  i.value=v;updateSaleModalTotal();
-}
-function updateSaleModalTotal(){if(!activeProductForSale)return;$('saleModalTotal').innerText=fm(activeProductForSale.prixVente*(parseInt($('saleQuantity').value)||1))}
+function adjustSaleQty(d){const i=$('saleQuantity');let v=(parseInt(i.value)||1)+d;if(v<1)v=1;if(activeProductForSale&&v>maxQ())v=maxQ();i.value=v;updateSaleModalTotal()}
+function updateSaleModalTotal(){if(!activeProductForSale)return;$('saleModalTotal').innerText=fm(saleInfo().price*(parseInt($('saleQuantity').value)||1))}
+function onSaleUnit(){if(!activeProductForSale)return;if(maxQ()<1)$('saleUnit').value='unit';$('saleQuantity').max=maxQ();if((parseInt($('saleQuantity').value)||1)>maxQ())$('saleQuantity').value=maxQ();updateSaleModalTotal()}
 $('saleQuantity').addEventListener('input',updateSaleModalTotal);
 function confirmSale(){
   const p=activeProductForSale;if(!p)return;
-  const qty=parseInt($('saleQuantity').value)||1,method=$('salePaymentMethod').value;
+  const n=parseInt($('saleQuantity').value)||1,method=$('salePaymentMethod').value,I=saleInfo(),qty=n*I.mult,total=I.price*n;
   if(qty>p.stockActuel){askConfirm("Stock insuffisant !",true);return}
   const av=p.stockActuel;p.stockActuel-=qty;const now=new Date().toISOString();
-  sales.unshift({id:Date.now(),productId:p.id,productName:p.name,prixUnitaire:p.prixVente,prixAchatUnitaire:p.prixAchat,quantite:qty,total:p.prixVente*qty,coutAchatTotal:p.prixAchat*qty,paymentMethod:method,date:now});
+  const s={id:Date.now(),productId:p.id,productName:p.name,prixUnitaire:total/qty,prixAchatUnitaire:p.prixAchat,quantite:qty,total,coutAchatTotal:p.prixAchat*qty,paymentMethod:method,date:now};
+  if(I.c)s.nbCasiers=n;
+  sales.unshift(s);
   stockMovements.unshift({id:Date.now()+1,productId:p.id,productName:p.name,type:'SORTIE',quantite:qty,stockAvant:av,stockApres:p.stockActuel,motif:`Vente caisse (${method})`,date:now});
-  closeModal('modalSale');saveData();notify(`✅ Vente validée : ${qty} × ${p.name} — ${fm(p.prixVente*qty)}`,'sale');
+  closeModal('modalSale');saveData();notify(`✅ Vente validée : ${I.c?n+' casier'+(n>1?'s':'')+' de':n+' ×'} ${p.name} — ${fm(total)}`,'sale');
 }
 async function cancelSale(id){
   if(!await askConfirm("Voulez-vous vraiment annuler cette vente et réintégrer les bouteilles en stock ?"))return;
@@ -459,18 +505,20 @@ function openProductModal(id){
   $('prodEditId').value=p?p.id:'';$('prodTitle').innerText=p?'Modifier le produit':'Nouveau produit';
   $('prodName').value=p?p.name:'';$('prodCategory').value=p?p.category:'Bière';
   $('prodPrixAchat').value=p?p.prixAchat:'';$('prodPrixVente').value=p?p.prixVente:'';$('prodStock').value=p?p.stockActuel:24;
-  $('prodStockLbl').innerText=p?'Stock actuel (bouteilles)':'Stock initial (bouteilles)';openModal('modalProduct');
+  $('prodStockLbl').innerText=p?'Stock actuel (bouteilles)':'Stock initial (bouteilles)';
+  $('prodCasierBox').style.display=uMode()==='unit'?'none':'block';$('whoPBox').style.display=p?'none':'block';$('prodParCasier').value=p&&p.parCasier||12;$('prodPrixCasier').value=p&&p.prixCasier||'';openModal('modalProduct');
 }
-function saveProduct(e){
-  e.preventDefault();if(!isAdmin())return;
+async function saveProduct(e){
+  e.preventDefault();if(!isAdmin())return;if(!$('prodEditId').value&&!await needWho('P'))return;
   const eid=parseInt($('prodEditId').value),stock=parseInt($('prodStock').value)||0,now=new Date().toISOString();
   const f={name:$('prodName').value.trim(),category:$('prodCategory').value,prixAchat:parseInt($('prodPrixAchat').value)||0,prixVente:parseInt($('prodPrixVente').value)||0};
+  if(uMode()!=='unit'){f.parCasier=parseInt($('prodParCasier').value)||12;f.prixCasier=parseInt($('prodPrixCasier').value)||f.prixVente*f.parCasier}
   if(eid){
     const p=products.find(x=>x.id===eid);if(!p)return;Object.assign(p,f);
     if(stock!==p.stockActuel){const d=stock-p.stockActuel;stockMovements.unshift({id:Date.now(),productId:p.id,productName:p.name,type:d>0?'ENTREE':'SORTIE',quantite:Math.abs(d),stockAvant:p.stockActuel,stockApres:stock,motif:'Ajustement (administrateur)',date:now});p.stockActuel=stock}
   }else{
-    const n={id:Date.now(),...f,stockActuel:stock};products.push(n);
-    if(stock>0)stockMovements.unshift({id:Date.now()+2,productId:n.id,productName:n.name,type:'ENTREE',quantite:stock,stockAvant:0,stockApres:stock,motif:'Stock initial à la création',date:now});
+    const n={id:Date.now(),...f,stockActuel:stock,ajoutePar:who.P};products.push(n);
+    if(stock>0)stockMovements.unshift({id:Date.now()+2,productId:n.id,productName:n.name,type:'ENTREE',quantite:stock,stockAvant:0,stockApres:stock,motif:'Stock initial à la création · par '+WL[who.P],par:who.P,date:now});
   }
   closeModal('modalProduct');saveData();notify(eid?`✏️ Produit modifié : ${f.name}`:`🆕 Nouveau produit ajouté : ${f.name}`,'product');
 }
@@ -479,11 +527,11 @@ async function deleteProduct(id){
   if(!await askConfirm(`Supprimer « ${p.name} » ? Son stock et ses mouvements seront supprimés (les ventes passées restent dans l’historique).`))return;
   products=products.filter(x=>x.id!==id);stockMovements=stockMovements.filter(m=>m.productId!==id);saveData();
 }
-function saveReassort(e){
-  e.preventDefault();
-  const p=products.find(x=>x.id===parseInt($('reassortProductSelect').value)),q=parseInt($('reassortQty').value)||0;
+async function saveReassort(e){
+  e.preventDefault();if(!await needWho('R'))return;
+  const p=products.find(x=>x.id===parseInt($('reassortProductSelect').value)),q0=parseInt($('reassortQty').value)||0,cs=uMode()==='case'||(uMode()==='both'&&$('reassortUnit').value==='case'),q=q0*(p&&cs?pc(p):1);
   if(!p||q<=0)return;const av=p.stockActuel;p.stockActuel+=q;
-  stockMovements.unshift({id:Date.now(),productId:p.id,productName:p.name,type:'ENTREE',quantite:q,stockAvant:av,stockApres:p.stockActuel,motif:$('reassortMotif').value.trim()||'Réassort',date:new Date().toISOString()});
+  stockMovements.unshift({id:Date.now(),productId:p.id,productName:p.name,type:'ENTREE',quantite:q,stockAvant:av,stockApres:p.stockActuel,motif:($('reassortMotif').value.trim()||'Réassort')+(cs?` (${q0} casier${q0>1?'s':''})`:'')+' · par '+WL[who.R],par:who.R,date:new Date().toISOString()});
   closeModal('modalReassort');saveData();notify(`📦 Réassort : +${q} ${p.name}`,'stock');
 }
 function saveExpense(e){
@@ -499,13 +547,13 @@ function exportDataJSON(){
 }
 
 // ---- Rendu ----
-function ticketRow(s){return `<div class="tr" style="${s.annule?'opacity:.65':''}"><div class="tm"><b>${s.quantite}x ${E(s.productName)}</b><small>PU: ${fm(s.prixUnitaire)} · <i class="fa-regular fa-clock"></i> ${ago(s.date)}</small></div><div>${payBadge(s)}${totTxt(s)}</div>${s.annule?'':`<button class="del" onclick="cancelSale(${s.id})"><i class="fa-solid fa-trash-can"></i></button>`}</div>`}
+function ticketRow(s){return `<div class="tr" style="${s.annule?'opacity:.65':''}"><div class="tm"><b>${qL(s)} ${E(s.productName)}</b><small>PU: ${fm(s.prixUnitaire)} · <i class="fa-regular fa-clock"></i> ${ago(s.date)}</small></div><div>${payBadge(s)}${totTxt(s)}</div>${s.annule?'':`<button class="del" onclick="cancelSale(${s.id})"><i class="fa-solid fa-trash-can"></i></button>`}</div>`}
 
 function renderDash(S,ca,pa,dep,AL){
-  $('dbCA').innerText=fm(ca);$('dbBenef').innerText=isAdmin()?fm(ca-pa-dep):'🔒';$('dbDep').innerText=fm(dep);
+  $('dbCA').innerText=fm(ca);$('dbBenef').innerText=(isAdmin()||cfg.gerantProfit)?fm(ca-pa-dep):'🔒';$('dbDep').innerText=fm(dep);
   $('dbCount').innerText=`${S.length} vente(s)`;$('dbItems').innerText=sum(S,s=>s.quantite);$('dbTotal').innerText=fm(ca);
   $('dbRecent').innerHTML=AL.length?AL.slice(0,3).map(s=>{const p=products.find(x=>x.id===s.productId);
-    return `<div class="tr" style="${s.annule?'opacity:.65':''}" onclick="switchTab('ventes');setSub('V','tickets')"><div class="th">${emo[p?p.category:'']||'🍹'}</div><div class="tm"><b>${s.quantite}x ${E(s.productName)}</b><small>PU: ${fm(s.prixUnitaire)} · <i class="fa-regular fa-clock"></i> ${ago(s.date)}</small></div><div>${payBadge(s)}${totTxt(s)}</div></div>`}).join(''):none("Aucune vente pour l’instant.");
+    return `<div class="tr" style="${s.annule?'opacity:.65':''}" onclick="switchTab('ventes');setSub('V','tickets')"><div class="th">${emo[p?p.category:'']||'🍹'}</div><div class="tm"><b>${qL(s)} ${E(s.productName)}</b><small>PU: ${fm(s.prixUnitaire)} · <i class="fa-regular fa-clock"></i> ${ago(s.date)}</small></div><div>${payBadge(s)}${totTxt(s)}</div></div>`}).join(''):none("Aucune vente pour l’instant.");
 }
 function renderVentes(S,ca,AL){
   $('vBtls').innerText=sum(S,s=>s.quantite);$('vCA').innerText=fm(ca);$('vTick').innerText=S.length;
@@ -542,7 +590,7 @@ function renderHist(){
     const names=[...new Set(S.map(s=>s.productName))];
     if(hQuery&&!(lbl(k)+' '+k+' '+names.join(' ')).toLowerCase().includes(hQuery))return '';
     const t=k===T?`Aujourd’hui (${lbl(k)})`:k===y?`Hier (${lbl(k)})`:lbl(k),v=!!validated[k];
-    return `<div class="nb day"><div class="sp"><h4><i class="fa-solid fa-calendar-days" style="color:var(--c)"></i> ${t}</h4><span class="stt ${v?'v':''}">${v?'Validé':k===T?'En cours (Non validé)':'Non validé'}</span></div><div class="nums"><div><small>Chiffre d’Affaires</small><b style="color:var(--g)">${fm(sum(S,s=>s.total))}</b></div><div><small>Bouteilles</small><b style="color:var(--c)">${sum(S,s=>s.quantite)} btls</b></div><div><small>Dépenses</small><b style="color:${dep?'var(--r)':'var(--sub)'}">${fm(dep)}</b></div></div>${isAdmin()?`<div class="sp" style="margin-top:10px;font-size:13px"><span>Bénéfice net du jour</span><b style="color:var(--g)">${fm(sum(S,s=>s.total)-sum(S,s=>s.coutAchatTotal)-dep)}</b></div>`:''}<details><summary><small>${sum(S,s=>s.quantite)} btls vendues • ${names.length} produits • ${S.length} ventes</small> <span style="color:var(--c);float:right;font-size:12px">Voir ventes par produit ▾</span></summary><div class="mv">${names.length?names.map(n=>{const l=S.filter(s=>s.productName===n);return `<div><span>${E(n)} · ${sum(l,s=>s.quantite)} btl(s)</span><b style="color:var(--g)">${fm(sum(l,s=>s.total))}</b></div>`}).join(''):none("Aucune vente.")}</div></details></div>`}).join('');
+    return `<div class="nb day"><div class="sp"><h4><i class="fa-solid fa-calendar-days" style="color:var(--c)"></i> ${t}</h4><b style="margin-left:auto;color:var(--g);font-size:13px">${fm(sum(S,s=>s.total))}</b><span class="stt ${v?'v':''}">${v?'Validé':k===T?'En cours (Non validé)':'Non validé'}</span></div><div class="nums"><div><small>Chiffre d’Affaires</small><b style="color:var(--g)">${fm(sum(S,s=>s.total))}</b></div><div><small>Bouteilles</small><b style="color:var(--c)">${sum(S,s=>s.quantite)} btls</b></div><div><small>Dépenses</small><b style="color:${dep?'var(--r)':'var(--sub)'}">${fm(dep)}</b></div></div>${isAdmin()?`<div class="sp" style="margin-top:10px;font-size:13px"><span>Bénéfice net du jour</span><b style="color:var(--g)">${fm(sum(S,s=>s.total)-sum(S,s=>s.coutAchatTotal)-dep)}</b></div>`:''}<details><summary><small>${sum(S,s=>s.quantite)} btls vendues • ${names.length} produits • ${S.length} ventes</small> <span style="color:var(--c);float:right;font-size:12px">Voir ventes par produit ▾</span></summary><div class="mv">${names.length?names.map(n=>{const l=S.filter(s=>s.productName===n);return `<div><span>${E(n)} · ${sum(l,s=>s.quantite)} btl(s)</span><b style="color:var(--g)">${fm(sum(l,s=>s.total))}</b></div>`}).join(''):none("Aucune vente.")}</div></details></div>`}).join('');
   $('histList').innerHTML=out||none("Aucun résultat.");
 }
 function renderExp(){
@@ -551,9 +599,49 @@ function renderExp(){
 }
 function refreshUI(){
   const T=todayK(),S=salesOn(T),AL=allSalesOn(T),ca=sum(S,s=>s.total),pa=sum(S,s=>s.coutAchatTotal),dep=sum(expenses.filter(e=>dk(e.date)===T),e=>e.montant);
-  applyRole();renderDash(S,ca,pa,dep,AL);renderVentes(S,ca,AL);renderStock();renderHist();renderExp();renderSettings();
+  applyRole();renderDash(S,ca,pa,dep,AL);renderFeed();renderAdmin();renderVentes(S,ca,AL);renderStock();renderHist();renderExp();renderSettings();
 }
 $('currentDateDisplay').innerText=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+/* ===== OPTIONS V2 : type de vente, statut, admin, synthèse ===== */
+let cfg=load('bar_cfg',{mode:null,gerantProfit:false}),who={R:null,P:null};
+const uMode=()=>cfg.mode||'unit',pc=p=>p.parCasier||12,prixC=p=>p.prixCasier||p.prixVente*pc(p),WL={gerant:'Gérant',admin:'Administrateur'};
+const qL=s=>s.nbCasiers?`${s.nbCasiers} casier${s.nbCasiers>1?'s':''} (${s.quantite} btls) ·`:`${s.quantite}x`;
+function saveCfg(){setLS('bar_cfg',JSON.stringify(cfg));scheduleSync();refreshUI()}
+function askMode(){if(!cfg.mode&&session&&$('login').classList.contains('off'))openModal('modalMode')}
+function setMode(m){cfg.mode=m;saveCfg();closeModal('modalMode');notify('✅ Type de vente enregistré','sale')}
+function pickWho(g,w){who[g]=w;document.querySelectorAll('#who'+g+' button').forEach(b=>b.classList.toggle('on',b.dataset.w===w))}
+async function needWho(g){
+  if(!who[g]){await askConfirm('Choisis d’abord ton statut : Gérant ou Administrateur.',true);return false}
+  if(who[g]==='admin'&&!isAdmin()){await askConfirm('Pour choisir « Administrateur », passe d’abord en mode Administrateur dans les Réglages.',true);return false}
+  return true;
+}
+function renderFeed(){
+  const el=$('dbStock');if(!el)return;
+  const m=stockMovements.find(x=>x.type==='ENTREE'&&!/Ajustement/.test(x.motif||''));
+  el.innerHTML=m?`<div class="tr" onclick="switchTab('stock');setSub('S','journal')"><div class="tm"><b>📦 +${m.quantite} ${E(m.productName)}</b><small>${/création/.test(m.motif||'')?'Nouveau produit':'Réassort'}${m.par?' · '+WL[m.par]:''} · ${ago(m.date)} · voir le journal</small></div></div>`:none('Aucun ajout de stock pour l’instant.');
+}
+function renderAdmin(){
+  const sw=$('swProfit');if(sw)sw.checked=!!cfg.gerantProfit;
+  const sd=subDays();$('stSub').textContent=sd===null?'':sd>0?sd+' j':'expiré';
+  $('stSubTxt').innerHTML=sd===null?'':sd>0?`Il te reste <b>${sd} jour${sd>1?'s':''}</b>.<br>`:'<b>Abonnement expiré.</b><br>';
+  $('stMode').textContent={unit:'Unité',case:'Casier',both:'Les deux'}[uMode()];
+  document.querySelectorAll('#segMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===uMode()));
+  if(!isAdmin())return;
+  const T=todayK(),W=dk(Date.now()-6*864e5);
+  const per=f=>{const S=sales.filter(x=>!x.annule&&dk(x.date)>=f),dep=sum(expenses.filter(e=>dk(e.date)>=f),e=>e.montant),ca=sum(S,x=>x.total),pa=sum(S,x=>x.coutAchatTotal);return{ca,pa,dep,b:ca-pa-dep}};
+  $('admSum').innerHTML=[['Aujourd’hui',T],['7 derniers jours',W],['Depuis le début','0000']].map(([l,f])=>{const r=per(f);return `<div class="ar"><b>${l}</b><span>Ventes ${fm(r.ca)}</span><span>Achats ${fm(r.pa)}</span><span>Dépenses ${fm(r.dep)}</span><b style="color:${r.b>=0?'var(--g)':'var(--r)'}">Bénéfice ${fm(r.b)}</b></div>`}).join('');
+  $('admProd').innerHTML=products.length?products.map(p=>`<div class="ar"><b>${E(p.name)}</b><span>Achat ${fm(p.prixAchat)} · Vente ${fm(p.prixVente)}</span><span>Marge ${fm(p.prixVente-p.prixAchat)} / btl · Stock ${p.stockActuel}</span>${uMode()!=='unit'?`<span>Casier (${pc(p)} btls) : ${fm(prixC(p))}</span>`:''}</div>`).join(''):none('Aucun produit.');
+}
+function openReset(){closeModal('modalPwd');$('rsPass').value='';$('rsErr').innerText='';openModal('modalReset')}
+async function submitReset(e){
+  e.preventDefault();
+  try{await authCall('token?grant_type=password',{email:session.email,password:$('rsPass').value})}
+  catch(x){$('rsErr').innerText=/Failed to fetch|NetworkError|Load failed/i.test(String(x.message))?'Pas de connexion internet.':'Mot de passe du compte incorrect.';return}
+  ['bar_admin_hash','bar_admin_salt'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+  closeModal('modalReset');scheduleSync();openPwd('create');
+}
+$('histList').addEventListener('click',e=>{const h=e.target.closest('.day>.sp');if(h&&h===h.parentElement.firstElementChild)h.parentElement.classList.toggle('open')});
+$('pwdErr').insertAdjacentHTML('afterend','<a id="pwdForgot" href="#" onclick="event.preventDefault();openReset()" style="display:none;margin:8px 0;color:var(--c);font-size:13px;font-weight:700">Mot de passe oublié ?</a>');
 /* ===== CONNEXION (Supabase Auth, email + mot de passe) ===== */
 let session=load('bar_session',null);
 function saveSession(j){session={access_token:j.access_token,refresh_token:j.refresh_token,expires_at:Date.now()+(j.expires_in||3600)*1000,email:(j.user&&j.user.email)||(session&&session.email)||''};try{localStorage.setItem('bar_session',JSON.stringify(session))}catch(e){}}
@@ -597,7 +685,7 @@ function renderSub(){
   const paid=sub.paid_until&&new Date(sub.paid_until).getTime()>Date.now(),pl=d>1?'s':'';
   if(d<=0){showPaywall(true);bar.style.display='none';return}
   if(pwExpired)closePaywall();
-  if(!paid||d<=7){bar.textContent=(paid?`Abonnement : ${d} jour${pl} restant${pl} — Renouveler`:`Essai gratuit : ${d} jour${pl} restant${pl} — S’abonner`);bar.style.display='block'}else bar.style.display='none';
+  bar.style.display='none';
 }
 async function checkSub(){
   if(!session)return;
@@ -613,7 +701,7 @@ async function startPay(){
     try{localStorage.setItem('bar_country',$('pwCur').value)}catch(e){}
     if(j.url){location.href=j.url;return}
     m.textContent=j.error||'Erreur, réessaie dans un instant.';
-  }catch(e){m.textContent='Pas de connexion internet.'}
+  }catch(e){m.textContent=navigator.onLine===false?'Pas de connexion internet.':'Service de paiement injoignable ('+String(e.message||e).slice(0,80)+')'}
   b.disabled=false;
 }
 async function payCheck(){
@@ -715,6 +803,7 @@ function snapNow(){
   expenses.forEach(x=>o.expenses[x.id]=JSON.stringify(x));stockMovements.forEach(x=>o.movements[x.id]=JSON.stringify(x));
   Object.keys(validated).forEach(k=>o.validated[k]=JSON.stringify(validated[k]));
   const h=getLS('bar_admin_hash');if(h)o.settings.admin=JSON.stringify({hash:h,salt:getLS('bar_admin_salt')||''});
+  if(cfg.mode||cfg.gerantProfit)o.settings.config=JSON.stringify(cfg);
   return o;
 }
 async function sb(path,opt){
@@ -737,7 +826,7 @@ function applyRow(r){
   const mine=(c==='validated')?(validated[id]!==undefined?JSON.stringify(validated[id]):undefined):c==='settings'?undefined:(()=>{const x=ARR[c]&&ARR[c]().find(o=>String(o.id)===id);return x?JSON.stringify(x):undefined})();
   if(c!=='settings'&&mine!==undefined&&mine!==snap[c][id])return false; // modif locale non envoyée : elle gagnera au prochain envoi
   if(c==='validated'){if(r.deleted){delete validated[id];delete snap[c][id]}else{validated[id]=r.data;snap[c][id]=JSON.stringify(r.data)}return true}
-  if(c==='settings'){if(id==='admin'&&r.data){setLS('bar_admin_hash',r.data.hash);setLS('bar_admin_salt',r.data.salt);snap[c][id]=JSON.stringify({hash:r.data.hash,salt:r.data.salt})}return true}
+  if(c==='settings'){if(id==='config'&&r.data){cfg=r.data;setLS('bar_cfg',JSON.stringify(cfg));snap[c][id]=JSON.stringify(cfg);return true}if(id==='admin'&&r.data){setLS('bar_admin_hash',r.data.hash);setLS('bar_admin_salt',r.data.salt);snap[c][id]=JSON.stringify({hash:r.data.hash,salt:r.data.salt})}return true}
   const arr=ARR[c]();if(!arr)return false;const i=arr.findIndex(o=>String(o.id)===id);
   if(r.deleted){if(i>=0)arr.splice(i,1);delete snap[c][id];return true}
   let obj;if(i>=0){obj=arr[i];Object.keys(obj).forEach(k=>delete obj[k]);Object.assign(obj,r.data)}else{obj=r.data;arr.push(obj)}
@@ -773,7 +862,7 @@ async function initSync(){
       const pristine=!sales.length&&!expenses.length&&JSON.stringify(products)===JSON.stringify(DEFAULT_PRODUCTS);
       if(rem&&rem.length&&pristine){products.length=0;stockMovements.length=0;validated={}}
     }
-    syncReady=true;await syncNow();
+    syncReady=true;await syncNow();askMode();
   }catch(e){console.warn('Synchro:',e);setSyncState('err',String(e.message||e));syncReady=true}
   if(!window._sb){window._sb=1;
     setInterval(()=>{if(!document.hidden)syncNow()},10000);
