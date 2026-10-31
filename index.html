@@ -357,14 +357,7 @@ header>div:nth-child(2){min-width:0}
 </div></div>
 
 <script>
-const DEFAULT_PRODUCTS=[
-{id:1,name:"Beaufort Lager",category:"Bière",prixAchat:550,prixVente:800,stockActuel:36},
-{id:2,name:"Castel Beer",category:"Bière",prixAchat:500,prixVente:700,stockActuel:48},
-{id:3,name:"Guinness",category:"Bière",prixAchat:750,prixVente:1000,stockActuel:18},
-{id:4,name:"Coca Cola 33cl",category:"Soda & Jus",prixAchat:350,prixVente:500,stockActuel:24},
-{id:5,name:"Fanta Orange",category:"Soda & Jus",prixAchat:350,prixVente:500,stockActuel:20},
-{id:6,name:"Vin Rouge Bordeaux",category:"Vin",prixAchat:3500,prixVente:6000,stockActuel:8},
-{id:7,name:"Whisky Red Label",category:"Liqueur",prixAchat:9000,prixVente:15000,stockActuel:5}];
+const DEFAULT_PRODUCTS=[];
 function load(k,d){try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}}
 let products=load('bar_products',DEFAULT_PRODUCTS),sales=load('bar_sales',[]),expenses=load('bar_expenses',[]),stockMovements=load('bar_movements',[]),validated=load('bar_validated',{});
 let movAll=false,activeProductForSale=null,payFilter='TOUS',hFilter='all',hQuery='';
@@ -791,7 +784,7 @@ function toggleSignup(ev){
   $('lgPass').autocomplete=signupMode?'new-password':'current-password';
   $('lgForgot').style.display=signupMode?'none':'';
 }
-const OLD_KEYS=['bar_products','bar_sales','bar_expenses','bar_movements','bar_validated','bar_sync_snap','bar_sync_pull','bar_admin_hash','bar_admin_salt'];
+const OLD_KEYS=['bar_products','bar_sales','bar_expenses','bar_movements','bar_validated','bar_sync_snap','bar_sync_pull','bar_admin_hash','bar_admin_salt','bar_cfg'];
 function afterAuth(j){
   saveSession(j);const uid=j.user&&j.user.id;
   try{if(uid){const o=localStorage.getItem('bar_owner');localStorage.setItem('bar_owner',uid);
