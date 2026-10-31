@@ -245,13 +245,12 @@ header>div:nth-child(2){min-width:0}
   </div>
   <div class="nb panel mt" style="--k:#1a8f4a"><div class="ph"><i class="fa-solid fa-circle-user"></i><span>Compte</span></div>
     <div id="accEmail" style="color:var(--sub);font-size:14px;margin-bottom:10px;word-break:break-all"></div>
-    <button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:14px" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Se déconnecter</button>
   </div>
   <div class="nb panel mt" style="--k:#1e7a9a;padding:0;overflow:hidden">
   <details class="row"><summary><i class="fa-solid fa-crown"></i> Abonnement <em id="stSub"></em></summary><div class="hl"><span id="stSubTxt"></span><button class="btn mt" style="font-size:14px" onclick="openPaywall()">S’abonner / Renouveler</button></div></details>
-  <details class="row"><summary><i class="fa-solid fa-boxes-stacked"></i> Type de vente <em id="stMode"></em></summary><div class="hl"><div class="seg" id="segMode" style="margin:0"><button data-m="unit" onclick="setMode('unit')">Unité</button><button data-m="case" onclick="setMode('case')">Casier</button><button data-m="both" onclick="setMode('both')">Les deux</button></div></div></details>
+  <details class="row"><summary><i class="fa-solid fa-boxes-stacked"></i> Type de vente <em id="stMode"></em></summary><div class="hl"><div class="seg" id="segMode" style="margin:0"><button data-m="unit" onclick="setMode('unit')">Bouteille</button><button data-m="case" onclick="setMode('case')">Casier</button><button data-m="pack" onclick="setMode('pack')">Paquet</button><button data-m="carton" onclick="setMode('carton')">Carton</button></div></div></details>
   <details class="row"><summary><i class="fa-solid fa-circle-question"></i> Comment ça marche</summary><div class="hl">
-    <details><summary>Démarrer</summary><div class="hl">Crée ton compte, choisis ton type de vente (unité, casier ou les deux), puis passe en mode Administrateur (Réglages) pour ajouter tes boissons : Stocks → Nouveau produit.</div></details>
+    <details><summary>Démarrer</summary><div class="hl">Crée ton compte, choisis ton type de vente (bouteille, casier, paquet ou carton : un seul à la fois), puis passe en mode Administrateur (Réglages) pour ajouter tes boissons : Stocks → Nouveau produit.</div></details>
     <details><summary>Vendre</summary><div class="hl">« + Nouvelle Vente » → boisson, moyen de paiement, quantité → Valider. Le stock baisse tout seul. Pour annuler une vente, touche la corbeille du ticket.</div></details>
     <details><summary>Réassort et nouveau produit</summary><div class="hl">Le bouton orange de Stocks ajoute du stock. À chaque réassort ou nouveau produit, tu choisis ton statut (Gérant ou Administrateur) : ainsi on sait qui l’a fait. Les 3 derniers ajouts s’affichent sur le Tableau.</div></details>
     <details><summary>Dépenses et historique</summary><div class="hl">« + Dépense » pour noter une sortie d’argent. L’Historique montre chaque journée en une ligne : touche-la pour voir tous les détails. La journée se valide depuis Ventes.</div></details>
@@ -264,10 +263,11 @@ header>div:nth-child(2){min-width:0}
     <details><summary>J’ai oublié le mot de passe administrateur</summary><div class="hl">Onglet Admin (ou fenêtre du mot de passe) → « Oublié ? », puis entre le mot de passe de ton compte et crée-en un nouveau.</div></details>
     <details><summary>Mes données sont-elles perdues si je ne paie pas ?</summary><div class="hl">Non. Elles restent enregistrées. Seule l’ajout de nouvelles ventes est bloqué jusqu’au renouvellement.</div></details>
     <details><summary>Puis-je l’utiliser sur plusieurs téléphones ?</summary><div class="hl">Oui, avec le même compte. Les données se synchronisent.</div></details>
-    <details><summary>Comment vendre par casier ?</summary><div class="hl">Réglages → Type de vente. Pour chaque produit, indique le nombre de bouteilles par casier et le prix du casier.</div></details>
+    <details><summary>Comment vendre par casier, paquet ou carton ?</summary><div class="hl">Réglages → Type de vente : choisis Casier, Paquet ou Carton. Tout (stock, réassort, vente) se fait alors uniquement dans cette unité. Pour chaque produit, indique le nombre de bouteilles qu’il contient et son prix.</div></details>
   </div></details>
   <details class="row"><summary><i class="fa-solid fa-scale-balanced"></i> Légal et confidentialité</summary><div class="hl">Tes données (produits, ventes, dépenses, email) sont stockées de façon sécurisée sur nos serveurs, visibles uniquement par ton compte. Elles ne sont ni vendues ni partagées. Tu peux demander leur suppression par email. <a href="legal.html" target="_blank" style="color:var(--c);font-weight:700">Lire les conditions d’utilisation et la politique de confidentialité</a>.</div></details>
 </div>
+  <button class="btn mt" style="background:var(--r);color:#fff;font-size:15px;width:100%;margin-bottom:12px" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Se déconnecter</button>
 </section>
 </main>
 
@@ -287,7 +287,7 @@ header>div:nth-child(2){min-width:0}
     <div id="saleUnitBox" style="display:none"><label>Vendre par</label><select class="in" id="saleUnit" onchange="onSaleUnit()"><option value="unit">Bouteille (unité)</option><option value="case">Casier</option></select></div>
   <label>Moyen de paiement :</label>
   <select class="in" id="salePaymentMethod"><option>Espèces</option><option>Wave</option><option>Orange Money</option><option>MTN Money</option><option>Moov Money</option><option>Carte Bancaire</option><option>Offert / Perte</option></select>
-  <label style="text-align:center">Quantité (saisie manuelle ou +/−) :</label>
+  <label id="saleQLbl" style="text-align:center">Quantité (saisie manuelle ou +/−) :</label>
   <div class="qty"><button type="button" onclick="adjustSaleQty(-1)">−</button><input class="in" type="number" id="saleQuantity" value="1" min="1"><button type="button" onclick="adjustSaleQty(1)">＋</button></div>
   <div class="tot"><span>Total Vente :</span><b id="saleModalTotal"></b></div>
   <div class="acts"><button class="btn cancel" onclick="closeModal('modalSale')">Annuler</button><button class="btn ok" onclick="confirmSale()">Valider</button></div>
@@ -299,7 +299,7 @@ header>div:nth-child(2){min-width:0}
   <form onsubmit="saveReassort(event)">
     <label>Boisson</label><select class="in" id="reassortProductSelect" required onchange="updReassort()"></select>
     <div id="reassortUnitBox" style="display:none"><label>Unité</label><select class="in" id="reassortUnit" onchange="updReassort()"><option value="unit">Bouteilles</option><option value="case">Casiers</option></select></div>
-    <div id="reassortPcBox" style="display:none"><label>Bouteilles par casier <span style="color:var(--r)">*</span></label><input class="in" type="number" id="reassortPc" min="1" value="12" oninput="updReassort(1)"></div>
+    <div id="reassortPcBox" style="display:none"><label id="reassortPcLbl">Bouteilles par casier <span style="color:var(--r)">*</span></label><input class="in" type="number" id="reassortPc" min="1" value="12" oninput="updReassort(1)"></div>
     <label id="reassortQLbl">Quantité reçue (+ btls)</label><input class="in" type="number" id="reassortQty" required min="1" value="24" oninput="updReassort(1)">
     <small id="reassortHint" style="display:block;margin-top:6px;color:var(--c)"></small>
     <label>Motif ou fournisseur</label><input class="in" id="reassortMotif" value="Livraison fournisseur">
@@ -316,7 +316,7 @@ header>div:nth-child(2){min-width:0}
     <label>Nom de la boisson</label><input class="in" id="prodName" required placeholder="Ex : Heineken 50cl">
     <label>Catégorie</label><select class="in" id="prodCategory"><option value="Bière">Bière</option><option value="Vin">Vin</option><option value="Liqueur">Liqueur</option><option value="Soda & Jus">Soda & Jus</option><option value="Autre">Autre</option></select>
     <div class="g2"><div><label>Prix d’achat (F)</label><input class="in" type="number" id="prodPrixAchat" required min="0" placeholder="500"></div><div><label>Prix de vente (F)</label><input class="in" type="number" id="prodPrixVente" required min="0" placeholder="800"></div></div>
-    <div id="prodCasierBox" style="display:none"><div class="g2"><div><label>Bouteilles / casier</label><input class="in" type="number" id="prodParCasier" min="1" value="12" oninput="updProdHint()"></div><div><label>Prix du casier (F)</label><input class="in" type="number" id="prodPrixCasier" min="0" placeholder="Auto"></div></div></div>
+    <div id="prodCasierBox" style="display:none"><div class="g2"><div><label id="prodPcLbl">Bouteilles / casier</label><input class="in" type="number" id="prodParCasier" min="1" value="12" oninput="updProdHint()"></div><div><label id="prodPrixLbl">Prix du casier (F)</label><input class="in" type="number" id="prodPrixCasier" min="0" placeholder="Auto"></div></div></div>
     <div id="prodStockUnitBox" style="display:none"><label>Stock initial en</label><select class="in" id="prodStockUnit" onchange="updProdHint()"><option value="unit">Bouteilles</option><option value="case">Casiers</option></select></div>
     <label id="prodStockLbl">Stock initial (bouteilles)</label><input class="in" type="number" id="prodStock" required min="0" step="any" value="24" oninput="updProdHint()">
     <small id="prodStockHint" style="display:block;margin-top:6px;color:var(--c)"></small>
@@ -326,7 +326,7 @@ header>div:nth-child(2){min-width:0}
 </div></div>
 
 <div id="modalMode" class="ov" style="z-index:80"><div class="mdl" style="--g:#2ee98a;text-align:center"><div class="mh"><h3>Comment vends-tu ?</h3></div><p style="color:var(--sub);font-size:13px;margin:0 0 6px">Bar ou dépôt de boissons : choisis ton type de vente. Tu pourras le changer dans les Réglages.</p>
-  <button class="btn g mt" onclick="setMode('unit')">🍺 À l’unité (bouteille)</button><button class="btn a mt" onclick="setMode('case')">📦 Par casier</button><button class="btn mt" style="background:var(--s4);border:1.5px solid var(--ln2)" onclick="setMode('both')">🍺📦 Les deux</button></div></div>
+  <button class="btn g mt" onclick="setMode('unit')">🍺 Par bouteille</button><button class="btn a mt" onclick="setMode('case')">📦 Par casier</button><button class="btn mt" style="background:var(--s4);border:1.5px solid var(--ln2)" onclick="setMode('pack')">📦 Par paquet</button><button class="btn mt" style="background:var(--s4);border:1.5px solid var(--ln2)" onclick="setMode('carton')">📦 Par carton</button></div></div>
 <div id="modalReset" class="ov" style="z-index:75"><div class="mdl" style="--g:#a855f7"><div class="mh"><h3>Mot de passe administrateur oublié</h3><button onclick="closeModal('modalReset')"><i class="fa-solid fa-xmark"></i></button></div>
   <form onsubmit="submitReset(event)"><label>Pour prouver que c’est toi, entre le mot de passe de ton compte (celui de connexion)</label><input class="in" type="password" id="rsPass" required autocomplete="current-password"><div id="rsErr" style="color:var(--r);font-size:13px;min-height:18px"></div>
   <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalReset')">Annuler</button><button type="submit" class="btn ok" style="background:#a855f7">Continuer</button></div></form></div></div>
@@ -381,11 +381,11 @@ const payCol={es:'#2ee98a',wv:'#2f8bff',or:'#ff8a1f',mt:'#ffc400',mv:'#4d7dff',c
 const emo={'Bière':'🍺','Soda & Jus':'🥤','Vin':'🍷','Liqueur':'🥃'};
 const stTag=n=>n<=0?['out','Rupture']:n<=6?['low','Stock faible']:['ok','En Stock'];
 /* Stock : stocké en bouteilles en interne, affiché en casiers si le mode est « Par casier » */
-const stN=p=>uMode()==='case'?Math.ceil(p.stockActuel/pc(p)):p.stockActuel;
-function stQ(p,q){if(!p||uMode()==='unit')return String(q);const n=pc(p),c=Math.floor(q/n),r=q-c*n,pl=x=>x>1?'s':'';if(uMode()==='both'&&!c)return q+' btl'+pl(q);return c+' casier'+pl(c)+(r?' + '+r+' btl'+pl(r):'')}
+const stN=p=>uMode()!=='unit'?Math.ceil(p.stockActuel/pc(p)):p.stockActuel;
+function stQ(p,q){if(!p||uMode()==='unit')return String(q);const n=pc(p),c=Math.floor(q/n),r=q-c*n,M=mI(),pl=x=>x>1?'s':'';return c+' '+(c>1?M.many:M.one)+(r?' + '+r+' btl'+pl(r):'')}
 const stU=(p,q)=>uMode()==='unit'||!p?q+' btls':stQ(p,q);
-const cNote=p=>uMode()==='unit'?'':`1 casier = ${pc(p)} btls`;
-const mQ=m=>{const p=products.find(x=>x.id===m.productId);return p&&uMode()==='case'?m.quantite/pc(p):m.quantite};
+const cNote=p=>uMode()==='unit'?'':`1 ${mI().one} = ${pc(p)} btls`;
+const mQ=m=>{const p=products.find(x=>x.id===m.productId);return p&&uMode()!=='unit'?m.quantite/pc(p):m.quantite};
 const r1=x=>Math.round(x*10)/10;
 const none=t=>`<div class="none">${t}</div>`;
 
@@ -466,15 +466,15 @@ function newSale(id){
   const pick=av.find(p=>p.id===id)||av[0];$('saleProductSelect').value=pick.id;promptSale(pick.id);
 }
 $('saleProductSelect').addEventListener('change',e=>promptSale(parseInt(e.target.value)));
-function saleU(){return uMode()==='case'?'case':uMode()==='both'?$('saleUnit').value:'unit'}
+function saleU(){return uMode()!=='unit'?'case':'unit'}
 function saleInfo(){const p=activeProductForSale,c=saleU()==='case';return{c,mult:c?pc(p):1,price:c?prixC(p):p.prixVente}}
 const maxQ=()=>Math.floor(activeProductForSale.stockActuel/saleInfo().mult);
 function promptSale(id){
   activeProductForSale=products.find(p=>p.id===id);const p=activeProductForSale;
   if(!p||p.stockActuel<=0)return;
-  $('saleUnitBox').style.display=uMode()==='both'?'block':'none';
-  if(uMode()==='both'&&p.stockActuel<pc(p))$('saleUnit').value='unit';
-  if(maxQ()<1){askConfirm('Stock insuffisant pour un casier complet.',true);return}
+  $('saleUnitBox').style.display='none';
+  $('saleQLbl').innerText=uMode()==='unit'?'Quantité (saisie manuelle ou +/−) :':`Nombre de ${mI().many} (saisie manuelle ou +/−) :`;
+  if(maxQ()<1){askConfirm('Stock insuffisant pour un '+mI().one+' complet.',true);return}
   $('saleQuantity').value=1;$('saleQuantity').max=maxQ();updateSaleModalTotal();openModal('modalSale');
 }
 function adjustSaleQty(d){const i=$('saleQuantity');let v=(parseInt(i.value)||1)+d;if(v<1)v=1;if(activeProductForSale&&v>maxQ())v=maxQ();i.value=v;updateSaleModalTotal()}
@@ -487,10 +487,10 @@ function confirmSale(){
   if(qty>p.stockActuel){askConfirm("Stock insuffisant !",true);return}
   const av=p.stockActuel;p.stockActuel-=qty;const now=new Date().toISOString();
   const s={id:Date.now(),productId:p.id,productName:p.name,prixUnitaire:total/qty,prixAchatUnitaire:p.prixAchat,quantite:qty,total,coutAchatTotal:p.prixAchat*qty,paymentMethod:method,date:now};
-  if(I.c)s.nbCasiers=n;
+  if(I.c){s.nbCasiers=n;s.unite=uMode()}
   sales.unshift(s);
   stockMovements.unshift({id:Date.now()+1,productId:p.id,productName:p.name,type:'SORTIE',quantite:qty,stockAvant:av,stockApres:p.stockActuel,motif:`Vente caisse (${method})`,date:now});
-  closeModal('modalSale');saveData();notify(`✅ Vente validée : ${I.c?n+' casier'+(n>1?'s':'')+' de':n+' ×'} ${p.name} — ${fm(total)}`,'sale');
+  closeModal('modalSale');saveData();notify(`✅ Vente validée : ${I.c?n+' '+(n>1?mI().many:mI().one)+' de':n+' ×'} ${p.name} — ${fm(total)}`,'sale');
 }
 async function cancelSale(id){
   if(!await askConfirm("Voulez-vous vraiment annuler cette vente et réintégrer les bouteilles en stock ?"))return;
@@ -510,25 +510,26 @@ function openProductModal(id){
   $('prodName').value=p?p.name:'';$('prodCategory').value=p?p.category:'Bière';
   $('prodPrixAchat').value=p?p.prixAchat:'';$('prodPrixVente').value=p?p.prixVente:'';$('prodStock').value=p?p.stockActuel:24;
   
-  $('prodCasierBox').style.display=uMode()==='unit'?'none':'block';$('whoPBox').style.display=p?'none':'block';$('prodParCasier').value=p&&p.parCasier||12;$('prodPrixCasier').value=p&&p.prixCasier||'';
-  const m=uMode(),n=parseInt($('prodParCasier').value)||12;
-  $('prodStockUnitBox').style.display=m==='both'&&!p?'block':'none';$('prodStockUnit').value='unit';
-  $('prodStock').value=m==='case'?(p?Math.round(p.stockActuel/n*100)/100:2):(p?p.stockActuel:24);$('prodStock').dataset.orig=$('prodStock').value;
+  $('prodCasierBox').style.display=uMode()==='unit'?'none':'block';$('whoPBox').style.display=p?'none':'block';$('prodParCasier').value=p&&p.parCasier||mI().def;$('prodPrixCasier').value=p&&p.prixCasier||'';
+  const m=uMode(),n=parseInt($('prodParCasier').value)||mI().def;
+  $('prodStockUnitBox').style.display='none';
+  $('prodStock').value=m!=='unit'?(p?Math.round(p.stockActuel/n*100)/100:2):(p?p.stockActuel:24);$('prodStock').dataset.orig=$('prodStock').value;
   updProdHint();openModal('modalProduct');
 }
 function updProdHint(){
-  const m=uMode(),eid=$('prodEditId').value,ic=m==='case'||(m==='both'&&!eid&&$('prodStockUnit').value==='case');
-  $('prodStockLbl').innerText=(eid?'Stock actuel':'Stock initial')+(ic?' (casiers)':' (bouteilles)');
-  const n=parseInt($('prodParCasier').value)||12,v=parseFloat($('prodStock').value)||0;
-  $('prodStockHint').innerText=ic?`= ${Math.round(v*n)} bouteilles (1 casier = ${n} btls)`:'';
+  const M=mI(),eid=$('prodEditId').value,ic=uMode()!=='unit';
+  $('prodStockLbl').innerText=(eid?'Stock actuel':'Stock initial')+(ic?` (${M.many})`:' (bouteilles)');
+  $('prodPcLbl').innerText='Bouteilles / '+M.one;$('prodPrixLbl').innerText='Prix du '+M.one+' (F)';
+  const n=parseInt($('prodParCasier').value)||M.def,v=parseFloat($('prodStock').value)||0;
+  $('prodStockHint').innerText=ic?`= ${Math.round(v*n)} bouteilles (1 ${M.one} = ${n} btls)`:'';
 }
 async function saveProduct(e){
   e.preventDefault();if(!isAdmin())return;if(!$('prodEditId').value&&!await needWho('P'))return;
   const eid=parseInt($('prodEditId').value),now=new Date().toISOString();let stock=parseFloat($('prodStock').value)||0;
   const f={name:$('prodName').value.trim(),category:$('prodCategory').value,prixAchat:parseInt($('prodPrixAchat').value)||0,prixVente:parseInt($('prodPrixVente').value)||0};
-  if(uMode()!=='unit'){f.parCasier=parseInt($('prodParCasier').value)||12;f.prixCasier=parseInt($('prodPrixCasier').value)||f.prixVente*f.parCasier}
-  {const ic=uMode()==='case'||(uMode()==='both'&&!eid&&$('prodStockUnit').value==='case'),n=f.parCasier||12,po=eid&&products.find(x=>x.id===eid);
-   stock=po&&uMode()==='case'&&$('prodStock').value===$('prodStock').dataset.orig?po.stockActuel:Math.round(stock*(ic?n:1))}
+  if(uMode()!=='unit'){f.parCasier=parseInt($('prodParCasier').value)||mI().def;f.prixCasier=parseInt($('prodPrixCasier').value)||f.prixVente*f.parCasier}
+  {const ic=uMode()!=='unit',n=f.parCasier||mI().def,po=eid&&products.find(x=>x.id===eid);
+   stock=po&&ic&&$('prodStock').value===$('prodStock').dataset.orig?po.stockActuel:Math.round(stock*(ic?n:1))}
   if(eid){
     const p=products.find(x=>x.id===eid);if(!p)return;Object.assign(p,f);
     if(stock!==p.stockActuel){const d=stock-p.stockActuel;stockMovements.unshift({id:Date.now(),productId:p.id,productName:p.name,type:d>0?'ENTREE':'SORTIE',quantite:Math.abs(d),stockAvant:p.stockActuel,stockApres:stock,motif:'Ajustement (administrateur)',date:now});p.stockActuel=stock}
@@ -544,22 +545,23 @@ async function deleteProduct(id){
   products=products.filter(x=>x.id!==id);stockMovements=stockMovements.filter(m=>m.productId!==id);saveData();
 }
 function updReassort(keep){
-  const m=uMode(),both=m==='both',cs=m==='case'||(both&&$('reassortUnit').value==='case');
-  $('reassortUnitBox').style.display=both?'block':'none';$('reassortPcBox').style.display=cs?'block':'none';
-  $('reassortQLbl').innerText=cs?'Nombre de casiers reçus (+ casiers)':'Quantité reçue (+ btls)';
+  const M=mI(),cs=uMode()!=='unit';
+  $('reassortUnitBox').style.display='none';$('reassortPcBox').style.display=cs?'block':'none';
+  $('reassortPcLbl').innerHTML=`Bouteilles par ${M.one} <span style="color:var(--r)">*</span>`;
+  $('reassortQLbl').innerText=cs?`Nombre de ${M.many} reçus (+ ${M.many})`:'Quantité reçue (+ btls)';
   const p=products.find(x=>x.id===parseInt($('reassortProductSelect').value));
-  if(!keep&&p)$('reassortPc').value=p.parCasier||12;
+  if(!keep&&p)$('reassortPc').value=p.parCasier||M.def;
   const n=parseInt($('reassortPc').value)||0,q=parseInt($('reassortQty').value)||0;
-  $('reassortHint').innerText=cs&&n&&q?`= ${q*n} bouteilles (${q} casier${q>1?'s':''} × ${n})`:'';
+  $('reassortHint').innerText=cs&&n&&q?`= ${q*n} bouteilles (${q} ${q>1?M.many:M.one} × ${n})`:'';
 }
 async function saveReassort(e){
   e.preventDefault();if(!await needWho('R'))return;
-  const p=products.find(x=>x.id===parseInt($('reassortProductSelect').value)),q0=parseInt($('reassortQty').value)||0,cs=uMode()==='case'||(uMode()==='both'&&$('reassortUnit').value==='case'),pcv=cs?parseInt($('reassortPc').value)||0:0;
-  if(cs&&pcv<1){askConfirm('Indique le nombre de bouteilles par casier.',true);return}
+  const p=products.find(x=>x.id===parseInt($('reassortProductSelect').value)),q0=parseInt($('reassortQty').value)||0,cs=uMode()!=='unit',pcv=cs?parseInt($('reassortPc').value)||0:0;
+  if(cs&&pcv<1){askConfirm('Indique le nombre de bouteilles par '+mI().one+'.',true);return}
   const q=q0*(cs?pcv:1);
   if(!p||q<=0)return;if(cs)p.parCasier=pcv;const av=p.stockActuel;p.stockActuel+=q;
-  stockMovements.unshift({id:Date.now(),productId:p.id,productName:p.name,type:'ENTREE',quantite:q,stockAvant:av,stockApres:p.stockActuel,motif:($('reassortMotif').value.trim()||'Réassort')+(cs?` (${q0} casier${q0>1?'s':''})`:'')+' · par '+WL[who.R],par:who.R,date:new Date().toISOString()});
-  closeModal('modalReassort');saveData();notify(cs?`📦 Réassort : +${q0} casier${q0>1?'s':''} (${q} btls) ${p.name}`:`📦 Réassort : +${q} ${p.name}`,'stock');
+  stockMovements.unshift({id:Date.now(),productId:p.id,productName:p.name,type:'ENTREE',quantite:q,stockAvant:av,stockApres:p.stockActuel,motif:($('reassortMotif').value.trim()||'Réassort')+(cs?` (${q0} ${q0>1?mI().many:mI().one})`:'')+' · par '+WL[who.R],par:who.R,date:new Date().toISOString()});
+  closeModal('modalReassort');saveData();notify(cs?`📦 Réassort : +${q0} ${q0>1?mI().many:mI().one} (${q} btls) ${p.name}`:`📦 Réassort : +${q} ${p.name}`,'stock');
 }
 function saveExpense(e){
   e.preventDefault();
@@ -599,7 +601,7 @@ function renderVentes(S,ca,AL){
 }
 function renderStock(){
   const ent=r1(sum(stockMovements.filter(m=>m.type==='ENTREE'),mQ)),sor=r1(sum(stockMovements.filter(m=>m.type==='SORTIE'),mQ));
-  $('stRayon').innerText=uMode()==='case'?r1(sum(products,p=>p.stockActuel/pc(p))):sum(products,p=>p.stockActuel);$('stRayonU').innerText=uMode()==='case'?'casiers dispo':'btls dispo';$('stEnt').innerText='+'+ent;$('stSor').innerText='−'+sor;$('stVal').innerText=fm(sum(products,p=>p.prixVente*p.stockActuel));
+  $('stRayon').innerText=uMode()!=='unit'?r1(sum(products,p=>p.stockActuel/pc(p))):sum(products,p=>p.stockActuel);$('stRayonU').innerText=uMode()!=='unit'?mI().many+' dispo':'btls dispo';$('stEnt').innerText='+'+ent;$('stSor').innerText='−'+sor;$('stVal').innerText=fm(sum(products,p=>p.prixVente*p.stockActuel));
   $('S-boisson').innerHTML=products.map(p=>{const mv=stockMovements.filter(m=>m.productId===p.id),e=sum(mv.filter(m=>m.type==='ENTREE'),m=>m.quantite),s=sum(mv.filter(m=>m.type==='SORTIE'),m=>m.quantite),t=stTag(stN(p));
     return `<div class="nb item" style="--k:var(--ln2)"><div class="sp"><div><h4>${E(p.name)}</h4><small>Catégorie : ${E(p.category)}${uMode()!=='unit'?' · '+cNote(p):''}</small></div><span class="tag ${t[0]}">${t[1]}</span></div><div class="g3 mt"><div class="box"><small>Prix vente</small><b style="color:var(--b)">${fm(p.prixVente)}</b></div><div class="box"><small>Stock dispo</small><b${uMode()==='unit'?'':' style="font-size:14px"'}>${stQ(p,p.stockActuel)}</b></div><div class="box"><small>Valeur stock</small><b style="color:var(--g)">${fm(p.prixVente*p.stockActuel)}</b></div></div><div class="flux"><span>Entrées : <span class="fe">+${stU(p,e)}</span></span><span>Sorties : <span class="fs">−${stU(p,s)}</span></span></div>${isAdmin()?`<div class="flux"><span>Achat : ${fm(p.prixAchat)}</span><span style="color:var(--g)">Marge : +${fm(p.prixVente-p.prixAchat)} / btl</span></div><div class="acts" style="margin-top:10px"><button class="btn a" style="font-size:13px;padding:10px" onclick="openProductModal(${p.id})"><i class="fa-solid fa-pen"></i> Modifier</button><button class="btn cancel" style="font-size:13px;padding:10px" onclick="deleteProduct(${p.id})"><i class="fa-solid fa-trash-can"></i> Supprimer</button></div>`:''}</div>`}).join('');
   $('sTabJ').innerText=`Journal des Flux (${stockMovements.length})`;
@@ -631,8 +633,9 @@ function refreshUI(){
 $('currentDateDisplay').innerText=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 /* ===== OPTIONS V2 : type de vente, statut, admin, synthèse ===== */
 let cfg=load('bar_cfg',{mode:null,gerantProfit:false}),who={R:null,P:null};
-const uMode=()=>cfg.mode||'unit',pc=p=>p.parCasier||12,prixC=p=>p.prixCasier||p.prixVente*pc(p),WL={gerant:'Gérant',admin:'Administrateur'};
-const qL=s=>s.nbCasiers?`${s.nbCasiers} casier${s.nbCasiers>1?'s':''} (${s.quantite} btls) ·`:`${s.quantite}x`;
+const MODES={unit:{lbl:'Bouteille',one:'bouteille',many:'bouteilles',def:12},case:{lbl:'Casier',one:'casier',many:'casiers',def:12},pack:{lbl:'Paquet',one:'paquet',many:'paquets',def:6},carton:{lbl:'Carton',one:'carton',many:'cartons',def:24}};
+const uMode=()=>MODES[cfg.mode]?cfg.mode:'unit',mI=()=>MODES[uMode()],pc=p=>p.parCasier||mI().def,prixC=p=>p.prixCasier||p.prixVente*pc(p),WL={gerant:'Gérant',admin:'Administrateur'};
+const qL=s=>{const M=MODES[s.unite]||MODES.case;return s.nbCasiers?`${s.nbCasiers} ${s.nbCasiers>1?M.many:M.one} (${s.quantite} btls) ·`:`${s.quantite}x`};
 function saveCfg(){setLS('bar_cfg',JSON.stringify(cfg));scheduleSync();refreshUI()}
 function askMode(){if(!cfg.mode&&session&&$('login').classList.contains('off'))openModal('modalMode')}
 function setMode(m){cfg.mode=m;saveCfg();closeModal('modalMode');notify('✅ Type de vente enregistré','sale')}
@@ -651,7 +654,7 @@ function renderAdmin(){
   const sw=$('swProfit');if(sw)sw.checked=!!cfg.gerantProfit;
   const sd=subDays();$('stSub').textContent=sd===null?'':sd>0?sd+' j':'expiré';
   $('stSubTxt').innerHTML=sd===null?'':sd>0?`Il te reste <b>${sd} jour${sd>1?'s':''}</b>.<br>`:'<b>Abonnement expiré.</b><br>';
-  $('stMode').textContent={unit:'Unité',case:'Casier',both:'Les deux'}[uMode()];
+  $('stMode').textContent=mI().lbl;
   document.querySelectorAll('#segMode button').forEach(b=>b.classList.toggle('on',b.dataset.m===uMode()));
   if(!isAdmin())return;
   const T=todayK(),W=dk(Date.now()-6*864e5);
