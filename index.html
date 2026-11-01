@@ -116,6 +116,7 @@ label{display:block;font-size:12px;font-weight:700;margin:14px 2px 6px}
 .acts{display:flex;gap:10px;margin-top:18px}.acts .btn{padding:13px;font-size:15px}.btn.cancel{background:linear-gradient(90deg,#f0145a,#ff4d7e)}.btn.ok{background:#3dff8b;color:#03210f}
 :root[data-theme="light"]{color-scheme:light;--bg:#eef3ff;--tx:#0f1a3a;--sub:#5a6b92;--sub2:#4a5a80;--g:#12a05a;--b:#1d6fe8;--c:#0a8fb0;--a:#d98200;--r:#e11d48;--p:#8b3fe0;--s1:#fff;--s2:#f1f5ff;--s3:#f3f6ff;--s4:#e8f0ff;--s4b:#e8f0ffcc;--s5:#fff;--s6:#fffffff0;--s7:#e0f7ee;--sd:#dcf7e8;--ln:#c5d3f5;--ln2:#b4c7f0;--ln3:#c5d3f566;--w14:#0f1a3a12;--w0d:#0f1a3a0a;--chipt:#fff}
 :root:not([data-role="admin"]) .adm{display:none!important}
+:root[data-role="admin"] .gonly{display:none!important}:root[data-role="admin"] .g2.sale2{grid-template-columns:1fr}
 header>div:nth-child(2){min-width:0}
 .rb{margin-left:auto;font-size:10px;font-weight:800;padding:5px 9px;border-radius:9px;border:1.5px solid var(--k);color:var(--k)}
 .gear{width:42px;height:42px;border-radius:14px;background:var(--s2);border:1.5px solid var(--ln2);color:var(--c);font-size:18px;flex:none}
@@ -165,9 +166,9 @@ header>div:nth-child(2){min-width:0}
     <div class="nb tile" style="--k:#2f8bff" onclick="switchTab('ventes')"><div class="lb">VENTE DU JOUR</div><div class="ic2" style="color:#22d3ee"><i class="fa-solid fa-cart-plus"></i></div></div>
     <div class="nb tile" style="--k:#8b5cf6" onclick="switchTab('stock')"><div class="lb">GESTION DE STOCK</div><div class="ic2" style="color:#ffb020;border-color:#ff9f0a"><i class="fa-solid fa-box-archive"></i></div></div>
   </div>
-  <div class="g2 mt">
+  <div class="g2 sale2 mt">
     <button class="btn g" onclick="newSale()"><i class="fa-solid fa-cart-plus"></i> + Nouvelle Vente</button>
-    <button class="btn r" onclick="openModal('modalExpense')"><i class="fa-solid fa-dollar-sign"></i> + Dépense</button>
+    <button class="btn r gonly" onclick="openModal('modalExpense')"><i class="fa-solid fa-dollar-sign"></i> + Dépense</button>
   </div>
   <div class="nb panel mt" id="synth">
     <div class="ph"><i class="fa-solid fa-chart-column"></i><span>Synthèse des Ventes du Jour</span><em id="dbCount"></em></div>
@@ -175,7 +176,7 @@ header>div:nth-child(2){min-width:0}
       <div class="mini"><div class="ic"><i class="fa-solid fa-boxes-stacked"></i></div><div><small>Articles Vendus</small><b id="dbItems"></b></div></div>
       <div class="mini g"><div class="ic"><i class="fa-solid fa-wallet"></i></div><div><small>Total Encaissé</small><b id="dbTotal"></b></div></div>
     </div>
-    <div class="hint"><span>Dernières transactions (3 dernières ventes) :</span><span>Plus récente en haut</span></div>
+    <div class="hint"><span>Dernières transactions (ventes et dépenses) :</span><span>Plus récente en haut</span></div>
     <div id="dbRecent"></div>
     <div class="hint" style="margin-top:8px"><span>Dernier ajout au stock :</span></div><div id="dbStock"></div>
     <div class="more" onclick="switchTab('ventes');setSub('V','tickets')">Accéder au tableau complet des ventes <i class="fa-solid fa-arrow-right"></i></div>
@@ -225,7 +226,7 @@ header>div:nth-child(2){min-width:0}
 
 <!-- DÉPENSES -->
 <section id="section-depenses" class="tab">
-  <button class="btn r" onclick="openModal('modalExpense')"><i class="fa-solid fa-plus"></i> Ajouter une dépense</button>
+  <button class="btn r gonly" onclick="openModal('modalExpense')"><i class="fa-solid fa-plus"></i> Ajouter une dépense</button>
   <div class="nb panel mt" style="--k:#7a1e3e"><div class="ph"><span>Dépenses</span><em id="expTotal" style="color:var(--r)"></em></div><div id="expList"></div></div>
 </section>
 <section id="section-admin" class="tab adm">
@@ -253,8 +254,8 @@ header>div:nth-child(2){min-width:0}
     <details><summary>Démarrer</summary><div class="hl">Crée ton compte, choisis ton type de vente (bouteille, casier, paquet ou carton : un seul à la fois), puis passe en mode Administrateur (Réglages) pour ajouter tes boissons : Stocks → Nouveau produit.</div></details>
     <details><summary>Vendre</summary><div class="hl">« + Nouvelle Vente » → boisson, moyen de paiement, quantité → Valider. Le stock baisse tout seul. Pour annuler une vente, touche la corbeille du ticket.</div></details>
     <details><summary>Réassort et nouveau produit</summary><div class="hl">Le bouton orange de Stocks ajoute du stock. À chaque réassort ou nouveau produit, tu choisis ton statut (Gérant ou Administrateur) : ainsi on sait qui l’a fait. Les 3 derniers ajouts s’affichent sur le Tableau.</div></details>
-    <details><summary>Dépenses et historique</summary><div class="hl">« + Dépense » pour noter une sortie d’argent. L’Historique montre chaque journée en une ligne : touche-la pour voir tous les détails. La journée se valide depuis Ventes.</div></details>
-    <details><summary>Gérant et Administrateur</summary><div class="hl"><b>Gérant</b> : ventes, dépenses, réassort, annulations. <b>Administrateur</b> (mot de passe) : en plus, l’onglet Admin avec prix d’achat, prix de vente et bénéfices, la modification des produits, et le choix de montrer ou non le bénéfice du jour au gérant.</div></details>
+    <details><summary>Dépenses et historique</summary><div class="hl">Le gérant touche « + Dépense » pour noter une petite dépense du jour et la justifier (l’administrateur ne peut pas en saisir). L’Historique montre chaque journée en une ligne : touche-la pour voir tous les détails. La journée se valide depuis Ventes.</div></details>
+    <details><summary>Gérant et Administrateur</summary><div class="hl"><b>Gérant</b> : ventes, dépenses du jour, réassort, ajout de nouveaux produits, annulations. <b>Administrateur</b> (mot de passe) : en plus, l’onglet Admin avec prix d’achat, prix de vente et bénéfices, la modification des produits, et le choix de montrer ou non le bénéfice du jour au gérant.</div></details>
     <details><summary>Abonnement</summary><div class="hl">Essai gratuit de 14 jours, puis 8 500 F par mois. Touche « S’abonner » (bande orange ou Réglages), choisis ton pays et paie par Mobile Money ou carte. Chaque paiement ajoute 30 jours. Si l’abonnement se termine, tes données sont conservées : tu retrouves tout en renouvelant.</div></details>
     <details><summary>Sauvegarde et réseau</summary><div class="hl">Tes données sont synchronisées automatiquement (point vert en haut). Sans internet, l’application continue et envoie tout au retour du réseau. Le même compte marche sur plusieurs téléphones.</div></details>
   </div></details>
@@ -300,13 +301,13 @@ header>div:nth-child(2){min-width:0}
     <label>Boisson</label><select class="in" id="reassortProductSelect" required onchange="updReassort()"></select>
     <div id="reassortUnitBox" style="display:none"><label>Unité</label><select class="in" id="reassortUnit" onchange="updReassort()"><option value="unit">Bouteilles</option><option value="case">Casiers</option></select></div>
     <div id="reassortPcBox" style="display:none"><label id="reassortPcLbl">Bouteilles par casier <span style="color:var(--r)">*</span></label><input class="in" type="number" id="reassortPc" min="1" value="12" oninput="updReassort(1)"></div>
-    <label id="reassortQLbl">Quantité reçue (+ btls)</label><input class="in" type="number" id="reassortQty" required min="1" value="24" oninput="updReassort(1)">
+    <label id="reassortQLbl">Quantité reçue (+ btls)</label><input class="in" type="number" id="reassortQty" required min="1" value="0" oninput="updReassort(1)">
     <small id="reassortHint" style="display:block;margin-top:6px;color:var(--c)"></small>
     <label>Motif ou fournisseur</label><input class="in" id="reassortMotif" value="Livraison fournisseur">
     <label>Qui fait cette opération ? <span style="color:var(--r)">*</span></label><div class="seg whoSeg" id="whoR"><button type="button" data-w="gerant" onclick="pickWho('R','gerant')">Gérant</button><button type="button" data-w="admin" style="--sg:#c084fc" onclick="pickWho('R','admin')">Administrateur</button></div>
     <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalReassort')">Annuler</button><button type="submit" class="btn ok" style="background:#4da3ff;color:#001a3d">Ajouter</button></div>
   </form>
-  <button class="btn a mt adm" style="font-size:14px;padding:12px" onclick="closeModal('modalReassort');openProductModal()"><i class="fa-solid fa-plus"></i> Nouveau produit</button>
+  <button class="btn a mt" style="font-size:14px;padding:12px" onclick="closeModal('modalReassort');openProductModal()"><i class="fa-solid fa-plus"></i> Nouveau produit</button>
 </div></div>
 
 <!-- Nouveau produit -->
@@ -318,7 +319,7 @@ header>div:nth-child(2){min-width:0}
     <div class="g2"><div><label>Prix d’achat (F)</label><input class="in" type="number" id="prodPrixAchat" required min="0" placeholder="500"></div><div><label>Prix de vente (F)</label><input class="in" type="number" id="prodPrixVente" required min="0" placeholder="800"></div></div>
     <div id="prodCasierBox" style="display:none"><div class="g2"><div><label id="prodPcLbl">Bouteilles / casier</label><input class="in" type="number" id="prodParCasier" min="1" value="12" oninput="updProdHint()"></div><div><label id="prodPrixLbl">Prix du casier (F)</label><input class="in" type="number" id="prodPrixCasier" min="0" placeholder="Auto"></div></div></div>
     <div id="prodStockUnitBox" style="display:none"><label>Stock initial en</label><select class="in" id="prodStockUnit" onchange="updProdHint()"><option value="unit">Bouteilles</option><option value="case">Casiers</option></select></div>
-    <label id="prodStockLbl">Stock initial (bouteilles)</label><input class="in" type="number" id="prodStock" required min="0" step="any" value="24" oninput="updProdHint()">
+    <label id="prodStockLbl">Stock initial (bouteilles)</label><input class="in" type="number" id="prodStock" required min="0" step="any" value="0" oninput="updProdHint()">
     <small id="prodStockHint" style="display:block;margin-top:6px;color:var(--c)"></small>
     <div id="whoPBox"><label>Qui fait cette opération ? <span style="color:var(--r)">*</span></label><div class="seg whoSeg" id="whoP"><button type="button" data-w="gerant" onclick="pickWho('P','gerant')">Gérant</button><button type="button" data-w="admin" style="--sg:#c084fc" onclick="pickWho('P','admin')">Administrateur</button></div></div>
     <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalProduct')">Annuler</button><button type="submit" class="btn a">Enregistrer</button></div>
@@ -349,7 +350,7 @@ header>div:nth-child(2){min-width:0}
 <div id="modalExpense" class="ov"><div class="mdl" style="--g:#ff3b6b">
   <div class="mh"><h3>Enregistrer une dépense</h3><button onclick="closeModal('modalExpense')"><i class="fa-solid fa-xmark"></i></button></div>
   <form onsubmit="saveExpense(event)">
-    <label>Motif</label><input class="in" id="expenseMotif" required placeholder="Ex : sacs de glace, électricité…">
+    <label>Motif (justification)</label><input class="in" id="expenseMotif" required placeholder="Ex : repas du gérant, sacs de glace, petite réparation…">
     <label>Montant (FCFA)</label><input class="in" type="number" id="expenseAmount" required min="1" placeholder="2500">
     <label>Catégorie</label><select class="in" id="expenseCategory"><option value="Glace / Consommables">Glace / Consommables</option><option value="Salaires / Pourboires">Salaires / Personnel</option><option value="Énergie / Loyer">Énergie / Électricité / Loyer</option><option value="Maintenance">Maintenance et hygiène</option><option value="Autre">Autre dépense</option></select>
     <div class="acts"><button type="button" class="btn cancel" onclick="closeModal('modalExpense')">Annuler</button><button type="submit" class="btn r">Enregistrer</button></div>
@@ -400,7 +401,7 @@ function toggleTheme(){theme=theme==='dark'?'light':'dark';setLS('bar_theme',the
 function renderSettings(){
   $('swDark').checked=theme==='dark';
   document.querySelectorAll('#segRole button').forEach(b=>b.classList.toggle('on',b.dataset.r===role));
-  $('roleDesc').innerText=isAdmin()?'Accès complet : bénéfices en temps réel, modifications et suppressions.':'Ventes, dépenses, réassort, annulations, validation et sauvegarde. Pas de bénéfices, pas de modification des produits.';
+  $('roleDesc').innerText=isAdmin()?'Accès complet : bénéfices en temps réel, modifications et suppressions. Les dépenses du jour sont saisies par le gérant.':'Ventes, dépenses du jour, réassort, ajout de nouveaux produits, annulations, validation et sauvegarde. Pas de bénéfices, pas de modification des produits.';
 }
 async function hashPwd(p,salt){
   const t=salt+':'+p;
@@ -453,7 +454,7 @@ function setSub(g,n){
 }
 function openModal(id){
   if(id==='modalReassort'||id==='modalProduct'){who={R:null,P:null};document.querySelectorAll('.whoSeg button').forEach(b=>b.classList.remove('on'))}
-  if(id==='modalReassort')updReassort()
+  if(id==='modalReassort'){$('reassortQty').value=0;updReassort()}
   $(id).classList.add('open');
 }
 function closeModal(id){$(id).classList.remove('open')}
@@ -508,12 +509,12 @@ function openProductModal(id){
   const p=id?products.find(x=>x.id===id):null;
   $('prodEditId').value=p?p.id:'';$('prodTitle').innerText=p?'Modifier le produit':'Nouveau produit';
   $('prodName').value=p?p.name:'';$('prodCategory').value=p?p.category:'Bière';
-  $('prodPrixAchat').value=p?p.prixAchat:'';$('prodPrixVente').value=p?p.prixVente:'';$('prodStock').value=p?p.stockActuel:24;
+  $('prodPrixAchat').value=p?p.prixAchat:'';$('prodPrixVente').value=p?p.prixVente:'';$('prodStock').value=p?p.stockActuel:0;
   
   $('prodCasierBox').style.display=uMode()==='unit'?'none':'block';$('whoPBox').style.display=p?'none':'block';$('prodParCasier').value=p&&p.parCasier||mI().def;$('prodPrixCasier').value=p&&p.prixCasier||'';
   const m=uMode(),n=parseInt($('prodParCasier').value)||mI().def;
   $('prodStockUnitBox').style.display='none';
-  $('prodStock').value=m!=='unit'?(p?Math.round(p.stockActuel/n*100)/100:2):(p?p.stockActuel:24);$('prodStock').dataset.orig=$('prodStock').value;
+  $('prodStock').value=m!=='unit'?(p?Math.round(p.stockActuel/n*100)/100:0):(p?p.stockActuel:0);$('prodStock').dataset.orig=$('prodStock').value;
   updProdHint();openModal('modalProduct');
 }
 function updProdHint(){
@@ -524,7 +525,7 @@ function updProdHint(){
   $('prodStockHint').innerText=ic?`= ${Math.round(v*n)} bouteilles (1 ${M.one} = ${n} btls)`:'';
 }
 async function saveProduct(e){
-  e.preventDefault();if(!isAdmin())return;if(!$('prodEditId').value&&!await needWho('P'))return;
+  e.preventDefault();if($('prodEditId').value&&!isAdmin())return;if(!$('prodEditId').value&&!await needWho('P'))return;
   const eid=parseInt($('prodEditId').value),now=new Date().toISOString();let stock=parseFloat($('prodStock').value)||0;
   const f={name:$('prodName').value.trim(),category:$('prodCategory').value,prixAchat:parseInt($('prodPrixAchat').value)||0,prixVente:parseInt($('prodPrixVente').value)||0};
   if(uMode()!=='unit'){f.parCasier=parseInt($('prodParCasier').value)||mI().def;f.prixCasier=parseInt($('prodPrixCasier').value)||f.prixVente*f.parCasier}
@@ -564,11 +565,11 @@ async function saveReassort(e){
   closeModal('modalReassort');saveData();notify(cs?`📦 Réassort : +${q0} ${q0>1?mI().many:mI().one} (${q} btls) ${p.name}`:`📦 Réassort : +${q} ${p.name}`,'stock');
 }
 function saveExpense(e){
-  e.preventDefault();
+  e.preventDefault();if(isAdmin()){closeModal('modalExpense');return}
   expenses.unshift({id:Date.now(),motif:$('expenseMotif').value.trim(),montant:parseInt($('expenseAmount').value)||0,category:$('expenseCategory').value,date:new Date().toISOString()});
   closeModal('modalExpense');$('expenseMotif').value='';$('expenseAmount').value='';saveData();notify(`💸 Dépense enregistrée : ${fm(expenses[0].montant)}`,'expense');
 }
-async function deleteExpense(id){if(!await askConfirm("Supprimer cette dépense ?"))return;expenses=expenses.filter(e=>e.id!==id);saveData()}
+async function deleteExpense(id){if(isAdmin())return;if(!await askConfirm("Supprimer cette dépense ?"))return;expenses=expenses.filter(e=>e.id!==id);saveData()}
 function exportDataJSON(){
   const d={dateExport:new Date().toISOString(),products,sales,expenses,movements:stockMovements,validated};
   const a=document.createElement('a');a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(d,null,2));
@@ -581,8 +582,11 @@ function ticketRow(s){return `<div class="tr" style="${s.annule?'opacity:.65':''
 function renderDash(S,ca,pa,dep,AL){
   $('dbCA').innerText=fm(ca);$('dbBenef').innerText=(isAdmin()||cfg.gerantProfit)?fm(ca-pa-dep):'🔒';$('dbDep').innerText=fm(dep);
   $('dbCount').innerText=`${S.length} vente(s)`;$('dbItems').innerText=sum(S,s=>s.quantite);$('dbTotal').innerText=fm(ca);
-  $('dbRecent').innerHTML=AL.length?AL.slice(0,3).map(s=>{const p=products.find(x=>x.id===s.productId);
-    return `<div class="tr" style="${s.annule?'opacity:.65':''}" onclick="switchTab('ventes');setSub('V','tickets')"><div class="th">${emo[p?p.category:'']||'🍹'}</div><div class="tm"><b>${qL(s)} ${E(s.productName)}</b><small>PU: ${fm(s.prixUnitaire)} · <i class="fa-regular fa-clock"></i> ${ago(s.date)}</small></div><div>${payBadge(s)}${totTxt(s)}</div></div>`}).join(''):none("Aucune vente pour l’instant.");
+  const T=todayK(),tx=[...AL.map(x=>({k:'s',d:x.date,x})),...expenses.filter(e=>dk(e.date)===T).map(x=>({k:'e',d:x.date,x}))].sort((a,b)=>new Date(b.d)-new Date(a.d)).slice(0,3);
+  $('dbRecent').innerHTML=tx.length?tx.map(t=>{
+    if(t.k==='e'){const e=t.x;return `<div class="tr" onclick="switchTab('depenses')"><div class="th">💸</div><div class="tm"><b>Dépense : ${E(e.motif)}</b><small>${E(e.category)} · <i class="fa-regular fa-clock"></i> ${ago(e.date)}</small></div><div class="tp" style="color:var(--r)">−${fm(e.montant)}</div></div>`}
+    const s=t.x,p=products.find(x=>x.id===s.productId);
+    return `<div class="tr" style="${s.annule?'opacity:.65':''}" onclick="switchTab('ventes');setSub('V','tickets')"><div class="th">${emo[p?p.category:'']||'🍹'}</div><div class="tm"><b>${qL(s)} ${E(s.productName)}</b><small>PU: ${fm(s.prixUnitaire)} · <i class="fa-regular fa-clock"></i> ${ago(s.date)}</small></div><div>${payBadge(s)}${totTxt(s)}</div></div>`}).join(''):none("Aucune vente ni dépense pour l’instant.");
 }
 function renderVentes(S,ca,AL){
   $('vBtls').innerText=sum(S,s=>s.quantite);$('vCA').innerText=fm(ca);$('vTick').innerText=S.length;
@@ -624,7 +628,7 @@ function renderHist(){
 }
 function renderExp(){
   $('expTotal').innerText='Aujourd’hui : '+fm(sum(expenses.filter(e=>dk(e.date)===todayK()),e=>e.montant));
-  $('expList').innerHTML=expenses.length?expenses.map(e=>`<div class="tr"><div class="tm"><b>${E(e.motif)}</b><small>${E(e.category)} · ${dtm(e.date)}</small></div><div class="tp" style="color:var(--r)">${fm(e.montant)}</div><button class="del" onclick="deleteExpense(${e.id})"><i class="fa-solid fa-trash-can"></i></button></div>`).join(''):none("Aucune dépense enregistrée.");
+  $('expList').innerHTML=expenses.length?expenses.map(e=>`<div class="tr"><div class="tm"><b>${E(e.motif)}</b><small>${E(e.category)} · ${dtm(e.date)}</small></div><div class="tp" style="color:var(--r)">${fm(e.montant)}</div><button class="del gonly" onclick="deleteExpense(${e.id})"><i class="fa-solid fa-trash-can"></i></button></div>`).join(''):none("Aucune dépense enregistrée.");
 }
 function refreshUI(){
   const T=todayK(),S=salesOn(T),AL=allSalesOn(T),ca=sum(S,s=>s.total),pa=sum(S,s=>s.coutAchatTotal),dep=sum(expenses.filter(e=>dk(e.date)===T),e=>e.montant);
