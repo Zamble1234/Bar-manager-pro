@@ -221,6 +221,7 @@ header>div:nth-child(2){min-width:0}
     <div class="chips" id="hChips" style="padding-bottom:0"></div>
   </div>
   <div id="histList" class="mt"></div>
+  <div class="g2 mt"><button class="btn r" style="font-size:14px" onclick="histPDF()"><i class="fa-solid fa-file-pdf"></i> Télécharger PDF</button><button class="btn" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:14px" onclick="histWord()"><i class="fa-solid fa-file-word"></i> Télécharger Word</button></div>
   <button class="btn mt" style="background:var(--s4);border:1.5px solid var(--ln2);font-size:14px" onclick="exportDataJSON()"><i class="fa-solid fa-download"></i> Sauvegarder les données (JSON)</button>
 </section>
 
@@ -254,7 +255,7 @@ header>div:nth-child(2){min-width:0}
     <details><summary>Démarrer</summary><div class="hl">Crée ton compte, choisis ton type de vente (bouteille, casier, paquet ou carton : un seul à la fois), puis passe en mode Administrateur (Réglages) pour ajouter tes boissons : Stocks → Nouveau produit.</div></details>
     <details><summary>Vendre</summary><div class="hl">« + Nouvelle Vente » → boisson, moyen de paiement, quantité → Valider. Le stock baisse tout seul. Pour annuler une vente, touche la corbeille du ticket.</div></details>
     <details><summary>Réassort et nouveau produit</summary><div class="hl">Le bouton orange de Stocks ajoute du stock. À chaque réassort ou nouveau produit, tu choisis ton statut (Gérant ou Administrateur) : ainsi on sait qui l’a fait. Les 3 derniers ajouts s’affichent sur le Tableau.</div></details>
-    <details><summary>Dépenses et historique</summary><div class="hl">Le gérant touche « + Dépense » pour noter une petite dépense du jour et la justifier (l’administrateur ne peut pas en saisir). L’Historique montre chaque journée en une ligne : touche-la pour voir tous les détails. La journée se valide depuis Ventes.</div></details>
+    <details><summary>Dépenses et historique</summary><div class="hl">Le gérant touche « + Dépense » pour noter une petite dépense du jour et la justifier (l’administrateur ne peut pas en saisir). L’Historique montre chaque journée en une ligne : touche-la pour voir tous les détails. Les boutons PDF et Word en bas téléchargent l’historique affiché. La journée se valide depuis Ventes.</div></details>
     <details><summary>Gérant et Administrateur</summary><div class="hl"><b>Gérant</b> : ventes, dépenses du jour, réassort, ajout de nouveaux produits, annulations. <b>Administrateur</b> (mot de passe) : en plus, l’onglet Admin avec prix d’achat, prix de vente et bénéfices, la modification des produits, et le choix de montrer ou non le bénéfice du jour au gérant.</div></details>
     <details><summary>Abonnement</summary><div class="hl">Essai gratuit de 14 jours, puis 8 500 F par mois. Touche « S’abonner » (bande orange ou Réglages), choisis ton pays et paie par Mobile Money ou carte. Chaque paiement ajoute 30 jours. Si l’abonnement se termine, tes données sont conservées : tu retrouves tout en renouvelant.</div></details>
     <details><summary>Sauvegarde et réseau</summary><div class="hl">Tes données sont synchronisées automatiquement (point vert en haut). Sans internet, l’application continue et envoie tout au retour du réseau. Le même compte marche sur plusieurs téléphones.</div></details>
@@ -502,6 +503,7 @@ async function cancelSale(id){
 }
 async function validateDay(){
   const k=todayK();if(validated[k])return;
+  if(!salesOn(k).length){await askConfirm('Aucune vente aujourd’hui : il n’y a rien à valider.',true);return}
   if(!await askConfirm("Valider les ventes de la journée ?"))return;
   validated[k]={ts:new Date().toISOString()};saveData();
 }
@@ -570,6 +572,45 @@ function saveExpense(e){
   closeModal('modalExpense');$('expenseMotif').value='';$('expenseAmount').value='';saveData();notify(`💸 Dépense enregistrée : ${fm(expenses[0].montant)}`,'expense');
 }
 async function deleteExpense(id){if(isAdmin())return;if(!await askConfirm("Supprimer cette dépense ?"))return;expenses=expenses.filter(e=>e.id!==id);saveData()}
+/* ===== EXPORT DE L’HISTORIQUE (PDF / Word) ===== */
+const HF={all:'Tout l’historique',today:'Aujourd’hui',yest:'Hier',week:'7 derniers jours'};
+const histLbl=k=>new Date(k+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+function histKeys(){
+  const T=todayK(),y=dk(Date.now()-864e5),w=dk(Date.now()-6*864e5);
+  let keys=[...new Set([...sales.filter(s=>!s.annule).map(s=>dk(s.date)),...expenses.map(e=>dk(e.date))])].sort().reverse();
+  return keys.filter(k=>hFilter==='all'||(hFilter==='today'&&k===T)||(hFilter==='yest'&&k===y)||(hFilter==='week'&&k>=w));
+}
+function histDoc(){
+  const keys=histKeys().filter(k=>{if(!hQuery)return true;const n=[...new Set(salesOn(k).map(s=>s.productName))];return (histLbl(k)+' '+k+' '+n.join(' ')).toLowerCase().includes(hQuery)});
+  if(!keys.length)return null;
+  const adm=isAdmin();let tCA=0,tB=0,tD=0,tQ=0;
+  const days=keys.map(k=>{
+    const S=salesOn(k),X=expenses.filter(e=>dk(e.date)===k),ca=sum(S,s=>s.total),pa=sum(S,s=>s.coutAchatTotal),dep=sum(X,e=>e.montant),q=sum(S,s=>s.quantite);
+    tCA+=ca;tD+=dep;tB+=ca-pa-dep;tQ+=q;
+    const names=[...new Set(S.map(s=>s.productName))];
+    const prod=names.map(n=>{const l=S.filter(s=>s.productName===n);return `<tr><td>${E(n)}</td><td class="r">${sum(l,s=>s.quantite)}</td><td class="r">${fm(sum(l,s=>s.total))}</td></tr>`}).join('');
+    const exp=X.map(e=>`<tr><td>${E(e.motif)}</td><td>${E(e.category)}</td><td>${E(new Date(e.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}))}</td><td class="r">${fm(e.montant)}</td></tr>`).join('');
+    return `<div class="day"><h3>${E(histLbl(k))} <span class="st">${validated[k]?'Validé':'Non validé'}</span></h3>`
+      +`<table class="sum"><tr><td>Chiffre d’affaires</td><td>Bouteilles vendues</td><td>Dépenses</td>${adm?'<td>Bénéfice net</td>':''}</tr><tr><th>${fm(ca)}</th><th>${q}</th><th>${fm(dep)}</th>${adm?`<th>${fm(ca-pa-dep)}</th>`:''}</tr></table>`
+      +(prod?`<table><tr><th>Produit vendu</th><th class="r">Btls</th><th class="r">Total</th></tr>${prod}</table>`:'')
+      +(exp?`<table><tr><th>Dépense (motif)</th><th>Catégorie</th><th>Heure</th><th class="r">Montant</th></tr>${exp}</table>`:'')+`</div>`;
+  }).join('');
+  const css='body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#111;margin:18px}h1{font-size:20px;margin:0 0 2px}h3{font-size:14px;margin:0 0 6px;background:#e8eefc;padding:6px 8px}.st{float:right;font-size:11px;font-weight:normal;color:#555}.meta{color:#555;margin-bottom:12px}table{width:100%;border-collapse:collapse;margin:0 0 8px}td,th{border:1px solid #bbb;padding:4px 6px;text-align:left;font-size:12px}th{background:#f4f4f4}.r{text-align:right}.sum td{font-size:11px;color:#555}.sum th{font-size:13px}.day{margin-bottom:16px;page-break-inside:avoid}.tot{border:2px solid #333;padding:8px;margin-bottom:16px}';
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Historique Bar Manager Pro</title><style>${css}</style></head><body><h1>Bar Manager Pro — Historique</h1><div class="meta">${E(HF[hFilter]||'')}${hQuery?' · recherche : '+E(hQuery):''} · généré le ${E(new Date().toLocaleString('fr-FR'))}</div><div class="tot"><b>Total :</b> chiffre d’affaires ${fm(tCA)} · ${tQ} bouteilles · dépenses ${fm(tD)}${adm?' · bénéfice net '+fm(tB):''}</div>${days}</body></html>`;
+}
+function histPDF(){
+  const html=histDoc();if(!html){askConfirm('Aucune journée à exporter.',true);return}
+  const o=$('printFrame');if(o)o.remove();
+  const f=document.createElement('iframe');f.id='printFrame';f.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
+  f.onload=()=>{try{f.contentWindow.focus();f.contentWindow.print()}catch(e){askConfirm('Impossible d’ouvrir l’impression. Essaie le bouton Word.',true)}};
+  document.body.appendChild(f);f.srcdoc=html;
+  notify('📄 Dans la fenêtre, choisis « Enregistrer au format PDF »','stock');
+}
+function histWord(){
+  const html=histDoc();if(!html){askConfirm('Aucune journée à exporter.',true);return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff',html],{type:'application/msword'}));
+  a.download='historique_'+todayK()+'.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+}
 function exportDataJSON(){
   const d={dateExport:new Date().toISOString(),products,sales,expenses,movements:stockMovements,validated};
   const a=document.createElement('a');a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(d,null,2));
@@ -616,8 +657,7 @@ function renderStock(){
 function renderHist(){
   const T=todayK(),y=dk(Date.now()-864e5),w=dk(Date.now()-6*864e5);
   $('hChips').innerHTML=[['all','Tout l’historique','fa-clock-rotate-left'],['today','Aujourd’hui','fa-calendar'],['yest','Hier','fa-calendar'],['week','7 derniers jours','fa-arrow-trend-up']].map(c=>`<button class="chip ${hFilter===c[0]?'on':''}" style="${hFilter===c[0]?'background:var(--p);color:#fff':''}" onclick="hFilter='${c[0]}';renderHist()"><i class="fa-solid ${c[2]}"></i> ${c[1]}</button>`).join('');
-  let keys=[...new Set([T,...sales.map(s=>dk(s.date)),...expenses.map(e=>dk(e.date))])].sort().reverse();
-  keys=keys.filter(k=>hFilter==='all'||(hFilter==='today'&&k===T)||(hFilter==='yest'&&k===y)||(hFilter==='week'&&k>=w));
+  const keys=histKeys();
   const lbl=k=>new Date(k+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   const out=keys.map(k=>{const S=salesOn(k),dep=sum(expenses.filter(e=>dk(e.date)===k),e=>e.montant);
     const names=[...new Set(S.map(s=>s.productName))];
