@@ -492,7 +492,7 @@ function confirmSale(){
   if(I.c){s.nbCasiers=n;s.unite=uMode()}
   sales.unshift(s);
   stockMovements.unshift({id:Date.now()+1,productId:p.id,productName:p.name,type:'SORTIE',quantite:qty,stockAvant:av,stockApres:p.stockActuel,motif:`Vente caisse (${method})`,date:now});
-  closeModal('modalSale');saveData();notify(`✅ Vente validée : ${I.c?n+' '+(n>1?mI().many:mI().one)+' de':n+' ×'} ${p.name} — ${fm(total)}`,'sale');
+  closeModal('modalSale');saveData();lowStockAlert(p,av);notify(`✅ Vente validée : ${I.c?n+' '+(n>1?mI().many:mI().one)+' de':n+' ×'} ${p.name} — ${fm(total)}`,'sale');
 }
 async function cancelSale(id){
   if(!await askConfirm("Voulez-vous vraiment annuler cette vente et réintégrer les bouteilles en stock ?"))return;
@@ -598,7 +598,67 @@ function histDoc(){
   const css='body{font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#111;margin:18px}h1{font-size:20px;margin:0 0 2px}h3{font-size:14px;margin:0 0 6px;background:#e8eefc;padding:6px 8px}.st{float:right;font-size:11px;font-weight:normal;color:#555}.meta{color:#555;margin-bottom:12px}table{width:100%;border-collapse:collapse;margin:0 0 8px}td,th{border:1px solid #bbb;padding:4px 6px;text-align:left;font-size:12px}th{background:#f4f4f4}.r{text-align:right}.sum td{font-size:11px;color:#555}.sum th{font-size:13px}.day{margin-bottom:16px;page-break-inside:avoid}.tot{border:2px solid #333;padding:8px;margin-bottom:16px}';
   return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Historique Bar Manager Pro</title><style>${css}</style></head><body><h1>Bar Manager Pro — Historique</h1><div class="meta">${E(HF[hFilter]||'')}${hQuery?' · recherche : '+E(hQuery):''} · généré le ${E(new Date().toLocaleString('fr-FR'))}</div><div class="tot"><b>Total :</b> chiffre d’affaires ${fm(tCA)} · ${tQ} bouteilles · dépenses ${fm(tD)}${adm?' · bénéfice net '+fm(tB):''}</div>${days}</body></html>`;
 }
+/* ===== VERSION APPLICATION ANDROID (Capacitor) ===== */
+const isNative=()=>!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+const loadScript=src=>new Promise((ok,ko)=>{if(document.querySelector('script[data-lib="'+src+'"]'))return ok();const s=document.createElement('script');s.src=src;s.dataset.lib=src;s.onload=ok;s.onerror=()=>ko(new Error('Fichier manquant : '+src));document.head.appendChild(s)});
+async function nativeShare(name,data,isText,title){
+  try{
+    const FS=Capacitor.Plugins.Filesystem,SH=Capacitor.Plugins.Share,o={path:name,data:data,directory:'CACHE'};
+    if(isText)o.encoding='utf8';
+    await FS.writeFile(o);
+    const u=await FS.getUri({path:name,directory:'CACHE'});
+    await SH.share({title:title||name,dialogTitle:'Enregistrer ou partager',files:[u.uri]});
+  }catch(e){if(!/cancel/i.test(String((e&&e.message)||e)))askConfirm('Impossible de créer le fichier : '+((e&&e.message)||e),true)}
+}
+function nativeInit(){if(!isNative())return;try{Capacitor.Plugins.LocalNotifications.requestPermissions()}catch(e){}}
+function lowStockAlert(p,av){
+  if(!isNative())return;
+  try{
+    const prev=uMode()!=='unit'?Math.ceil(av/pc(p)):av,cur=stN(p);
+    if((cur<=6&&prev>6)||(cur<=0&&prev>0))Capacitor.Plugins.LocalNotifications.schedule({notifications:[{id:Math.floor(Date.now()/1000)%2000000000,title:cur<=0?'Rupture de stock':'Stock faible',body:p.name+' : '+(cur<=0?'plus en stock':stQ(p,p.stockActuel)+' restant')}]});
+  }catch(e){}
+}
+function histCollect(){
+  const keys=histKeys().filter(k=>{if(!hQuery)return true;const n=[...new Set(salesOn(k).map(s=>s.productName))];return (histLbl(k)+' '+k+' '+n.join(' ')).toLowerCase().includes(hQuery)});
+  if(!keys.length)return null;
+  const adm=isAdmin();let tCA=0,tB=0,tD=0,tQ=0;
+  const days=keys.map(k=>{
+    const S=salesOn(k),X=expenses.filter(e=>dk(e.date)===k),ca=sum(S,s=>s.total),pa=sum(S,s=>s.coutAchatTotal),dep=sum(X,e=>e.montant),q=sum(S,s=>s.quantite);
+    tCA+=ca;tD+=dep;tB+=ca-pa-dep;tQ+=q;
+    const names=[...new Set(S.map(s=>s.productName))];
+    return {label:histLbl(k),st:validated[k]?'Validé':'Non validé',ca,q,dep,ben:ca-pa-dep,
+      prod:names.map(n=>{const l=S.filter(s=>s.productName===n);return [n,sum(l,s=>s.quantite),sum(l,s=>s.total)]}),
+      exp:X.map(e=>[e.motif,e.category,new Date(e.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),e.montant])};
+  });
+  return {adm,days,tCA,tB,tD,tQ};
+}
+async function histPdfNative(){
+  const R=histCollect();if(!R){askConfirm('Aucune journée à exporter.',true);return}
+  try{
+    await loadScript('lib/jspdf.umd.min.js');await loadScript('lib/jspdf.plugin.autotable.min.js');
+    const T=x=>String(x).replace(/[\u202f\u00a0]/g,' ').replace(/[—–]/g,'-').replace(/’/g,"'");
+    const F=a=>T(fm(a));
+    const doc=new window.jspdf.jsPDF({unit:'pt',format:'a4'});let y=40;
+    doc.setFontSize(16);doc.text('Bar Manager Pro - Historique',40,y);y+=16;
+    doc.setFontSize(9);doc.text(T((HF[hFilter]||'')+(hQuery?' - recherche : '+hQuery:'')+' - généré le '+new Date().toLocaleString('fr-FR')),40,y);y+=16;
+    doc.setFontSize(10);doc.text(T("Total : chiffre d'affaires "+F(R.tCA)+' - '+R.tQ+' bouteilles - dépenses '+F(R.tD)+(R.adm?' - bénéfice net '+F(R.tB):'')),40,y);y+=14;
+    const tbl=(head,body,fill)=>{doc.autoTable({startY:y,head:[head],body:body,theme:'grid',styles:{fontSize:9,cellPadding:3},headStyles:{fillColor:fill||[30,60,140]},margin:{left:40,right:40}});y=doc.lastAutoTable.finalY+8};
+    R.days.forEach(d=>{
+      if(y>740){doc.addPage();y=40}
+      doc.setFontSize(11);doc.text(T(d.label+'  ('+d.st+')'),40,y+10);y+=16;
+      tbl(R.adm?["Chiffre d'affaires",'Bouteilles','Dépenses','Bénéfice net']:["Chiffre d'affaires",'Bouteilles','Dépenses'],[R.adm?[F(d.ca),d.q,F(d.dep),F(d.ben)]:[F(d.ca),d.q,F(d.dep)]],[60,80,160]);
+      if(d.prod.length)tbl(['Produit vendu','Btls','Total'],d.prod.map(p=>[T(p[0]),p[1],F(p[2])]));
+      if(d.exp.length)tbl(['Dépense (motif)','Catégorie','Heure','Montant'],d.exp.map(e=>[T(e[0]),T(e[1]),e[2],F(e[3])]),[160,50,50]);
+    });
+    await nativeShare('historique_'+todayK()+'.pdf',doc.output('datauristring').split(',')[1],false,'Historique Bar Manager Pro');
+  }catch(e){askConfirm('Impossible de créer le PDF : '+((e&&e.message)||e),true)}
+}
+async function histWordNative(){
+  const html=histDoc();if(!html){askConfirm('Aucune journée à exporter.',true);return}
+  await nativeShare('historique_'+todayK()+'.doc','\ufeff'+html,true,'Historique Bar Manager Pro');
+}
 function histPDF(){
+  if(isNative()){histPdfNative();return}
   const html=histDoc();if(!html){askConfirm('Aucune journée à exporter.',true);return}
   const o=$('printFrame');if(o)o.remove();
   const f=document.createElement('iframe');f.id='printFrame';f.style.cssText='position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0';
@@ -607,12 +667,14 @@ function histPDF(){
   notify('📄 Dans la fenêtre, choisis « Enregistrer au format PDF »','stock');
 }
 function histWord(){
+  if(isNative()){histWordNative();return}
   const html=histDoc();if(!html){askConfirm('Aucune journée à exporter.',true);return}
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff',html],{type:'application/msword'}));
   a.download='historique_'+todayK()+'.doc';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),5000);
 }
 function exportDataJSON(){
   const d={dateExport:new Date().toISOString(),products,sales,expenses,movements:stockMovements,validated};
+  if(isNative()){nativeShare('bar_data_'+todayK()+'.json',JSON.stringify(d,null,2),true,'Sauvegarde Bar Manager Pro');return}
   const a=document.createElement('a');a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(d,null,2));
   a.download=`bar_data_${todayK()}.json`;document.body.appendChild(a);a.click();a.remove();
 }
@@ -738,6 +800,7 @@ function lockApp(msg){
   syncReady=false;const l=$('login');l.classList.remove('off');$('lgPass').value='';$('lgErr').textContent=msg||'';
 }
 function showApp(){
+  nativeInit();
   $('login').classList.add('off');$('lgErr').textContent='';$('lgPass').value='';
   const a=$('accEmail');if(a)a.textContent=(session&&session.email)||'';
   try{if(session&&session.email)localStorage.setItem('bar_last_email',session.email)}catch(e){}
